@@ -1,0 +1,41 @@
+cut values for quality and gamma hadron cuts
+========================================================
+
+* cutselection 70 0
+* arraychi2 0. 1.e30
+* arraycore -1. 350.
+* cameraedge -1. 2.00
+* sizesecondmax 200. 1.e30 V4
+* sizesecondmax 200. 1.e30 V5
+* sizesecondmax 200. 1.e30 V6
+* emissionheight 0. 1.e10
+* arrayltrig 0 0
+* arrayltrig 1 0
+* arrayltrig 2 0
+* arrayltrig 3 1
+* arrayltrig 4 0
+* arrayltrig 5 0 V4 1234
+* arrayltrig 5 1 V5
+* arrayltrig 5 1 V6
+* arrayltrig 6 1 V4
+* arrayltrig 6 0 V5 1234
+* arrayltrig 6 0 V6 1234
+* arrayltrig 7 1
+* arrayltrig 8 0
+* arrayltrig 9 0 V4
+* arrayltrig 9 0 V5 1234
+* arrayltrig 9 0 V6 1234
+* arrayltrig 10 0 V4 1234
+* arrayltrig 10 1 V5
+* arrayltrig 10 1 V6
+* arrayltrig 11 1
+* arrayltrig 12 1
+* arrayltrig 13 1
+* arrayltrig 14 1
+* arrayltrig 15 1
+* arraytheta2 -1. 0.008
+* arraymscw -2. 2
+* arraymscl -2 5
+* arrayechi2 -99999. 99999.
+* arraydE -99999. 99999.
+* arrayerec 0. 1.e10

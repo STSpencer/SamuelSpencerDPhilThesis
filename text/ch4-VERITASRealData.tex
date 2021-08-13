@@ -1,0 +1,576 @@
+\chapter{\label{ch:4-VERITASRealData} Challenges of applications of Deep Learning Event Classification methods to Real Data with VERITAS}
+\minitoc
+\section{Introduction}
+
+In this chapter, we explore potential issues with using CNN-based classifiers on real instrument data, when they have been trained with simulations. In this case from VERITAS, however using timing information with VERITAS is not possible because the telescope optical path delays create a $\approx$ 7ns timing jitter. Therefore we concern ourselves with methods using integrated-charge-only images, similar to more conventional IACT analysis. In light of the results described in Chapter \ref{ch:3-TimingInfo}, we do not consider electron-induced air showers given that CNN-based methods do not appear to show any promise of separating electrons from $\gamma$-rays; these are likely to be a negligible source of background at VERITAS energies anyway.
+
+Our CRNN algorithms have thus far been trained entirely with simulated data.  There are potentially serious issues to be considered when applying these CRNN based methods with real data: variations in night sky background levels, dead pixels or front end electronics, bright stars in the field of view, cloud cover and the ageing of telescopes could all create biases in the CNN response, and not all of these effects are trivial to simulate. The aim of this chapter is to determine the extent to which these effects influence the ability of deep learning methods to detect astrophysical sources in real data, and determine what, if any, strategies to combat this might be feasible. 
+
+Ultimately, we pursued two main avenues of investigation, the application of custom Monte Carlo simulations as training data, and the use of Bayesian Optimisation to determine model hyperparameters. However, the pipeline we developed could be used in future work should new mitigation strategies become apparent.
+
+\section{My VERITAS Deep Learning Analysis Chain}
+The analysis chain for VERITAS, which has been under development since 2004, was not designed to facilitate deep learning-based analysis (the earliest considerations for this for IACTs date to 2016). As such, developing an analysis chain capable of taking real and simulated VERITAS data and producing detections using deep learning analysis was a complex task. This section details the numerous stages to this analysis, and how we developed a 'bootstrap' counterpart deep learning analysis chain. We will begin by discussing the means of performing standard IACT analysis using EventDisplay.
+
+\footnote{Throughout this chapter, we adopt some conventions standard in VERITAS. The 'gammaness' quantity can interchangeably be referred to as an 'isGamma score', similarly we swap ROC curves for 'Signal Efficiency' curves, which are equivalent bar the x axis being inverted.}
+
+\subsection{Eventdisplay}
+
+\textit{Eventdisplay} (primarily written by Maier and Holder \cite{evdisp}) forms the basis of one of the two analysis chains used for VERITAS, though it has also been used to generate Instrument Response Functions for CTA. Written using the \textit{root} software framework \cite{root}, the Eventdisplay pipeline can be used to generate astronomical spectra, lightcurves and skymaps from IACT data. Its main steps are:
+
+\begin{itemize}
+\item The Eventdisplay Step: This concerns low-level calibration of the VERITAS camera images, such as pedestal subtraction and flat-fielding, along with generation of Hillas parameters. Eventdisplay can also be used to produce Data Storage Tape (DST) files containing calibrated event images, which are not normally stored during analysis, but which are required for performing deep learning analysis.
+
+\item The Mean Scaled Width (MSCW) step: This takes the image-wise Hillas parameterisations of the images from the cameras and combines them into the mean scaled width and length parameters. BDT event classification and directional selection into On/Off areas is also performed at this step. 
+
+\item The Anasum step: This takes information from the MSCW step and uses it to generate the required data for the creation of Skymaps and Spectra. 
+
+\item The Plotting Step: This contains two root classes (VPlotAnasumHistograms and VEnergySpectrum) to plot images and spectra.
+
+\end{itemize}
+
+\subsection{'Dead' Pixels}
+VERITAS's camera consists of standard, non silicon, photomultipliers. As such, it is unsafe to saturate these routinely, and such pixels have safeties built into them to shut the pixel down if the detected flux is too bright. Particularly in the case of bright stars, this results in blocks of ~four pixels (due to the VERITAS Point Spread Function) that are classified as 'dead' and so don't record data in a given event window. Such dead pixels are one of the prime culprits of discrepancies between real and simulated data, so we designed an interpolation strategy for the real data that replaces the zeros in the image arrays for these pixels and interpolates based on pixel intensity values up to six pixels away in the un-mapped image.  
+
+
+\section{Image Mapping}
+The VERITAS cameras consist of 499 photomultipliers as shown in \ref{fig:verc} \cite{vercam}.
+As the camera is not square, an appropriate geometric transformation must be applied. To do this, we use the ImageMapping classes from the CTA dl1-data-handler project \cite{dl1dh}. The analysis pipeline I have developed (see section 2.9) writes, and can process, VERITAS data transformed in 8 different ways: Axial Addressing, Oversampling, Rebinning, Nearest Interpolation, Bilinear Interpolation, Bicubic Interpolation and Image Shifting. However, internal results from the CTA consortium have shown that the difference between these mapping methods is negligible, so we primarily concern ourselves with Oversampling for the rest of this thesis.
+\begin{figure}[h]
+        \begin{center}
+        \includegraphics[width=\columnwidth]{figures/verc.png}
+
+        \caption{
+                \label{fig:verc} 
+                The VERITAS camera design, taken from \cite{vercam}. 
+        }
+        \end{center}
+\end{figure}
+
+
+\section{Simulations}
+The first issue to contend with is choice of training dataset, which also encompasses choices regarding image cleaning and data pre-selection cuts. Ideally, the training data should resemble the real data as closely as possible, but there is a computational trade off between using run wise simulations, which match the particular set of observations as closely as possible, and diffuse training data. We examine this trade off in section X. All previous attempts at using CNN-based methods have relied upon using tailcut-cleaned images \cite{Shilon} as both training datasets and with real test data. However we consider this to be counter-productive for background rejection \footnote{This may not be the case for directional reconstruction studies, in which CNNs appear very promising}, despite the fact it simplifies the real data problem as it removes the need to accuracy model an entire image with for example 499 pixels vs $\sim$6). This is as the entire purpose of investigating CNNs for $\gamma$-hadron separation is to utilise their sensitivity to minute features in the air shower images. These small features, such as hadronic halos \cite{model++}(Cherenkov light from the incident primary charged hadron) or subtle electromagnetic substructure would be completely destroyed by tailcut cleaning. As such, whilst using it may provide comparable results to BDTs on bright sources such as PKS 2155-304, using tailcut cleaning defeats the purpose of using CNNs for background rejection for IACTs. It is highly unlikely methods reliant upon such cleaning will aid analysis development for CTA in the case of background rejection or ever provide sufficient performance increase to justify the significantly increased computational cost of CNN-based methods.
+
+Performing harsh pre-selection cuts on training data (using either Hillas parameters or total intensity of images) will improve the AUC values obtained on simulations, but restricting ourselves to such obvious cases of $\gamma$-hadron separation again defeats the purpose of using CNN based methods. If the only events we consider are events a BDT would easily be able to classify, then there is no potential benefit of using a CNN given their significant complexity and high computational cost. As such, we use minimal dataset cuts throughout this work, performing no cuts on training data, and only minimal cuts on the MSCW and MSCL (to remove obviously hadronic events) as well as a necessary theta squared cut of 0.008 deg$^2$ that are a default part of the Eventdisplay analysis chain on real data.
+
+\VerbatimInput{text/aux/DL_testcuts.dat}
+
+
+
+Whilst there is a large amount of literature available on the problem of domain adaptation \cite{ada}, we believe that part of the key to the success of applying CRNN methods to data will be a run wise simulation approach in order to minimise the differences between simulations we use for training and real data. This is a new paradigm in gamma-ray astronomy \cite{rws}, pioneered by the H.E.S.S. collaboration, and entails generating a unique simulation dataset for every run (~30 minutes) of data collection. The notable achievements of this strategy include the detection of the extension of Centaurus A by an IACT (in prep). The list of simulated effects used by H.E.S.S. is listed in table 1. The VERITAS simulation chain is limited in its ability to totally reproduce all of these effects, though we aim to reproduce this approach as much as possible. These simulations were generated using the Corsika and CARE simulation packages.
+\subsection{Magnetic Field Effects}
+Because of the Lorentz force, and the comparatively strong geomagnetic field at the VERITAS site, VERITAS shower images are broadened in differing directions as a function of azimuth. 
+\subsection{Energy Thresholds}
+It is not immediately clear the energy thresholds for CORSIKA simulations that should be used when attempting to apply deep learning methods to real data. Set the energy threshold (particularly for proton showers which produce relatively little Cherenkov light as a function of energy) too low, and the classifier will struggle to converge on training data. But set it too high, and you might loose an improvement in sensitivity at low energies that CNN-type methods might bring.
+
+\subsection{Energy Spectrum and Event Ratios}
+Set the energy spectrum to be realistically steep and there will be an insufficient number of very high energy events (which are those we hope to exploit regarding partial image reconstruction) to improve the effective area at high energies. However, setting the energy spectrum to be flat might prevent the classifier from learning useful information about the relative intensity of proton and $\gamma$-ray events.
+
+Throughout the timing project, and through our initial investigations into real data, we have been using simulations with power law spectra and equal ratios of events (albeit over differing energy ranges). There is a question as to how this might affect testing against real data as this is not a completely accurate reflection of reality. Firstly, not every $\gamma$-ray source on the sky is equally bright, so the ratio of $\gamma$-ray to proton events will not be the same for every observation. Secondly, the spectra both of astrophysical gamma-ray sources and of the cosmic ray background is not a straight power law. This results in an energy dependence in the ratio of gamma-ray to proton events. Thirdly, there is a dependence on low-level trigger selection cuts, if data is only stored for events that produce a certain amount of Cherenkov light then this affects the ratio of stored $\gamma$-rays to stored protons. However, a counterargument to this is that with fewer events at a given energy the CRNN will train less well; and there is a trade off to be had between training efficiency and resembling real data closely. As such, in this Chapter we hedge our bets, and use the Veritas standard -1.5 spectral index. There is also an issue of class imbalance, as in reality CTA will detect many more protons than $\gamma$-rays. Given the ratio of events after basic event pre-selection is 1:1 for the Crab, we use this in our training data.
+
+\section{Gammaness Cut Optimisation}
+Gammaness ($\Gamma$) is the score given to a given event representing how closely the event resembles a $\gamma$-ray. In the Eventdisplay framework this is a float in the region [-0.5,0.5]. Typically one discards events from the analysis which have a gammaness below a particular value, which has to be optimised for the source flux in question. 
+
+Our 2DConvLSTM produces a vector (\textbf{x}) containing two values (one for each event class,   $\textbf{x}_1$ for $\gamma$-rays $\textbf{x}_0$ for protons). The values in this vector span the range [0,1] and must sum to 1. From this, we can construct a gammaness score through:
+
+\begin{algorithmic}
+    \IF{$argmax(\textbf{x}$)=0} 
+    \STATE $\Gamma=0.5-\textbf{x}_0$
+    \ELSE
+    \STATE $\Gamma=\textbf{x}_1-0.5$
+    \ENDIF
+\end{algorithmic}
+There is a question as to how meaningful this particular score is, and the role to which model uncertainty might play. We discuss the possibility for future Bayesian Neural Network analysis in Chapter \ref{ch6-Conclusions}.
+
+For conventional BDT analysis methods, the choice of gammaness cutoff to consider an individual event a gamma-ray is optimised to maximise the signal to noise ratio for a source. However, this algorithm is known to be difficult to translate to deep learning methods, details of this issue can be found in \cite{Shilon}. For the purposes of our work \ref{ch:4-VERITASRealData} we simply pick a value of 0.2.
+
+\section{The Crab Nebula}
+The Crab Nebula was the first astrophysical $\gamma$-ray source detected from the ground, in 1989 by the Whipple Observatory \cite{weekestev}. It is one of the most extensively studied $\gamma$-ray objects, and has recently been found to be extended at IACT energies \cite{holler}. In the last few months, it has been found by the AS-$\gamma$ experiment that the Crab Nebula produced some of the highest energy photons ever detected, resulting in a 5$\sigma$ detection of the Nebula at over 100TeV \cite{asgamma}. As a test of our analysis framework, the Crab Nebula is the first source we are attempting to detect, though this comes with some complications. Given that the Crab Nebula is a galactic source, rather than an extragalactic source such as PKS-2155-304 \cite{Shilon}, there are a greater number of bright stars in the camera field.
+
+\section{Methods}
+\subsection{Our Analysis Framework}
+In order to evaluate the effectiveness of CRNN event classifiers on real data, we have created a software framework to bootstrap the existing Eventdisplay analysis chain. This consists of three main steps:
+
+\begin{itemize}
+    \item Hdf5 file dumpers to convert both simulated and real VERITAS images in .root files into a format suitable for deep learning. This includes image mapping and mixing of proton/$\gamma$-ray simulations as appropriate.
+    \item \textit{Keras} scripts to perform training and testing of the CRNNs, and write test predictions for a given event to file.
+    \item Scripts to take a .root file generated using the normal analysis chain and add an additional tree containing the CRNN predictions in order to make spectra and skymaps.
+\end{itemize}
+
+Modifications to the Eventdisplay code were also necessary in order to handle both the new deep learning results and the use of run-wise simulations. A significant complicating factor we encountered was ensuring that exactly the same number of predictions were made as events in the data .root files, this mandated testing events individually with a batch size of 1 (a future sufficiently flexible end to end CTA pipeline would avoid this step). 
+\begin{figure}[] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=0.8\columnwidth]{figures/event_22_oversampling.png}
+
+        \caption{
+                \label{fig:Gamex} A simulated VERITAS MC $\gamma$-ray imaged using the oversampling image mapping technique. This event is shown as input to the ConvLSTM2D, without image cleaning applied.
+        }
+\end{figure}
+\begin{figure}[] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=0.75\columnwidth]{figures/Gettingout.png}
+
+        \caption{
+                \label{fig:Gettingout} The analysis pipeline I have created in order to perform CNN based event classification using the VERITAS array. Rectangles represent analysis scripts whereas ellipses represent stored data and squares output products. In the shaded blue region is the standard Eventdisplay pipelines, and on the right is the CNN classification pipeline. The shaded red region indicates code that was run on our group's Nvidia 1080Ti GPU in Oxford, for which there are associated transfer steps in order to relay this information to the computing cluster at DESY. The dashed lines show the pipeline for creation of Effective Areas. The only step not currently implemented is the generation of spectra, this is due to a bug in the core eventdisplay code.
+        }
+\end{figure}
+
+%This is crabrun2b
+\subsection{Effective Areas}
+Effective areas are an example of an Instrument Response Function (IRF) for an IACT array. They represent the collection area of the IACT array as a function of energy ($E$), and are necessary to generate astrophysical spectra. They are derived from a $\Gamma$ cut value and Monte Carlo (MC) simulations of $\gamma$-rays through the formula
+
+\begin{equation}
+    A_{eff}(E,\theta,\phi)=A_0\left(\frac{\textrm{Number of }\gamma\textrm{-rays that pass event selection }(E,\theta,\phi)}{\textrm{Total number of }\gamma\textrm{-rays }(E,\theta,\phi)}\right)
+\end{equation}
+
+which includes a dependence on zenith ($\theta$) and azimuth ($\phi$) angles and a normalisation constant $A_0$. Our pipeline can generate effective areas, and this gives us an idea of how well our event classifier performs as a function of energy.
+
+\subsection{Issues with the standard VERITAS analysis approach and deep learning}
+VERITAS does not normally use proton air shower simulations, and instead normally operates using BDTs trained on simulated gamma-rays with real proton air shower data as background. This approach is detailed in Maier and Knapp INCLUDE REFERENCE. Early in this investigation we found that this was not going to be a viable approach for CNN-type background rejection methods as the Convlstm2D classifier was sufficiently sensitive to be able to determine with 100 percent efficiency the differences between simulated gammas and real proton air showers on training data, but when applied to real test data the classifier was no better than a random number generator.
+\subsection{Analysis Cuts}
+One of the known issues with deep learning research for IACTs is that because of this real data problem, researchers will attempt to 'game' their event pre-selection such as to make it appear as if deep learning methods are performing roughly equally as well as conventional BDT/RF analysis. In such instances, all the effective classification power comes from the cuts selected, and the deep learning classifier is acting as a sophisticated, computationally expensive random number generator due to the discrepancies with simulated data. 
+
+\section{Initial Results}
+\subsection{Run Summaries}
+Run 64080 was selected due to its high degree of investigation and stability, and clear (category A) weather conditions.
+\begin{table}[h]
+    \centering
+    \resizebox{0.5\textwidth}{!}{
+    \begin{tabular}{c|c}
+    \textbf{Run Parameter} & Value\\
+    \hline
+    \textbf{Run Type} & Observing\\
+    \textbf{Weather} & A\\
+    \textbf{Run Start} & 2012-10-13 10:52:08\\
+    \textbf{Observation Mode} & Wobble\\
+    \textbf{Offset (RA, DEC)} & (0,0.5)\\
+    \textbf{Participating Telescopes} & T1 T2 T3 T4\\
+    \textbf{Number of Events} & 543481 \\
+    \textbf{Elapsed Time L3 (seconds)} & 1201.8 \\
+    \textbf{Live Time L3 (seconds) } & 1013.2 (84.32\%)\\
+    \textbf{Mean Trigger Rate (Hz)} & 536.3\\
+    \textbf{Mean Elevation (deg)} & 78.86\\
+    \textbf{Mean RA, DEC (deg)}& (83.64,22.52)\\
+    \end{tabular}
+    }
+    \caption{Observing summary for run 64080}
+    \label{table:obssummary}
+\end{table}
+
+\subsection{Effect of Custom Simulations}
+The following three figures show the initial results from the use of this pipeline and the custom simulations. The neural network has not been completely optimised on simulations, scoring an 83\% test accuracy and a 0.91 AUC (good results given the lack of event selection in the simulation test data). In particular, it should also be noted that most of the background rejection in these results is due to a cut on the theta squared Hillas parameter necessary to perform a reflected region analysis. Despite this being a ~$7.9\sigma$ detection of the Crab Nebula (which includes very soft cuts on the MSCW and MSCL), a BDT analysis gives a ~$22\sigma$ detection and the cut on the MSCW and MSCL alone yields a ~$7.4\sigma$ detection. Evidence for the need for a more thorough analysis of the  uncertainty in the model predictions can be demonstrated by the significance not changing if a cut on $\Gamma$ is changed from 0.2 to 0.4.
+\begin{figure}[] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=\columnwidth]{figures/EFF.png}
+
+        \caption{
+                \label{fig:EFF} Effective area of VERITAS as a function of energy, made using our analysis pipeline. The parameters for this are as follows: Zenith angle $10^{\circ}$, wobble offset=$0.5^{\circ}$, $\gamma$-ray spectral index=-1.5, noise level=250Hz. 
+        }
+\end{figure}
+There is a question about whether these effective curves areas are reliable, as mentioned in Chapter \ref{ch:2-CNNs}. The non-optimised ConvLSTM2D shown here appears to show negligible effective area improvement on random number generation.
+
+\begin{figure}[] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=\columnwidth]{figures/skysig.png}
+
+        \caption{
+                \label{fig:skysig} A $\gamma$-ray image of the Crab Nebula produced through our analysis pipeline and our CRNN background rejection technique along with a reflected region analysis. Regions containing bright stars recorded by the HIPPARCOS survey are also shown. Source and excluded regions are shown in purple.
+        }
+\end{figure}
+\begin{figure}[] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=0.5\columnwidth]{figures/sig1d.png}
+
+        \caption{
+                \label{fig:sig1D} The 1 dimensional significance distribution including the source region (Red) and excluding it (Blue) and a Gaussian fit to the cosmic ray background (Green). Significances in IACT $\gamma$-ray astronomy are defined by \cite{LiMa}.
+        }
+\end{figure}
+It appears as though custom simulations (as they are achievable with VERITAS) on their own are not enough to bridge the domain gap between real IACT data and simulations. The poor, noisy performance on validation data throughout the training process is a common feature we observed in using these ConvLSTM2D methods, and is part of the reason we did not use such data in \ref{ch:3-TimingInfo}. This could be a result of the small batch sizes needed to fit such models onto GPUs with finite VRAM, but it may also be a function of hyperparameter selection.
+
+\subsection{Hillas Width Analysis}
+There is a legitimate question of how closely the proton simulations described earlier in this chapter match the real data and the gamma-ray simulations. If the proton simulations have major discrepancies against the real data, and if the proton simulations are not reasonably similar to the $\gamma$-ray simulations, this may cause issues with the classifier network. As a sanity check, we retrofit the CTApipe Hillas extractor to extract Hillas Widths from our VERITAS images for the four telescopes (CT1-4), to act on both our simulated data and the real event images (after dead pixel interpolation).
+\begin{figure}[ht] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=\columnwidth]{figures/Gamma2_int.png}
+
+        \caption{
+                \label{fig:Gamma2_int} Hillas Width Distribution with 1000 bins for the Simulated $\gamma$-rays for the four telescopes.
+        }
+\end{figure}
+\begin{figure}[ht] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=\columnwidth]{figures/Proton2_int.png}
+
+        \caption{
+                \label{fig:Proton2_int} Hillas Width Distribution with 1000 bins for the Simulated Protons.
+        }
+\end{figure}
+
+\begin{figure}[ht] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=\columnwidth]{figures/Real_int.png}
+
+        \caption{
+                \label{fig:Real_int} Hillas Width Distribution with 1000 bins for the Real Events (Run 64080). 
+        }
+\end{figure}
+
+As you can see, all three width distributions are reasonably similar. There are more events in the Real histogram here due to a part in the code that cuts off the analysis if the Hillas parameter extraction fails for the first telescope, the total number of training events for the ConvLSTM analysis and the real data are unaffected by this.
+
+\subsection{Bayesian Optimisation}
+
+Hyperparameter optimisation is broadly defined as determining $x^*$, the set of hyperparameters that maximize the objective (minimise the loss) function ($f(x)$) of a machine learning algorithm on  data $x$ \begin{equation}
+    x^*=\arg \min_{x \in \chi} f(x)
+\end{equation}
+where $x$ is in a space $\chi$.
+
+One of the most common approaches to hyperparameter optimisation is Bayesian optimisation, and in particular the Tree Parzen Estimator (TPE) approach \cite{bergestra}\cite{tdshyper} \footnote{Alternatives include Evolutionary- (designed to mimic genetic mutation) and Gradient-based approaches, but these are beyond the scope of this thesis}. One of the key advantages of this method, unlike other Bayesian optimisation methods (such as Gaussian processes), is that it is not necessary to define a Bayesian prior. This is well suited to deep learning analysis as many of the hyperparameters of a CNN are not human-interpretable. Additionally, one wants the results of prior trials to inform the future searches (formally referred to as Sequential Model Based Optimisation), which is possible with random and grid search techniques \cite{tdshyper}. TPE approaches can however leverage this, and as a result have been shown to be substantially more effective than random searches on standard computer science datasets \cite{bergestra}. Where $y$ is the value of the objective function for a given set of hyperparameters $x^*$, the expected improvement $\textrm{EI}$ (which you aim to maximize at each step) is given by
+\begin{equation}
+    \textrm{EI}_{y^*}(x^*)=\int_{-\infty}^{y^*}(y^*-y)p(y|x^*)dy
+\end{equation}
+where $y^*$ is a threshold value of the objective function (below which $p(y|x^*)$ is zero), then TPE models construct a surrogate ($p(x^*|y)$) for the objective function indirectly using Bayes' rule
+\begin{equation}
+    p(y|x^*)=\frac{p(x^*|y)*p(y)}{p(x^*)}
+\end{equation}
+which is the probability of the hyperparameters given the score on the objective function \cite{tdshyper}. In turn, this surrogate is modelled as two separate distributions by TPE methods
+
+\begin{equation}
+    p(x^*|y) = \begin{cases} \textit{l}(x^*) & \mbox{, if }  y <y^* \\ \textit{g}(x^*) & \mbox{, if } y>=y^* \end{cases}
+\end{equation}
+
+where $y^*$ is the threshold value of the objective function. Using Bayes' theorem and substitution, the $\textrm{EI}$ can then be written (introducing a constant value $\gamma$) as 
+\begin{equation}
+    \textrm{EI}_{y^*}(x^*)=\frac{\gamma y^* \textit{l}(x^*)-\textit{l}(x^*)\int_{-\infty}^{y^*}p(y)dy}{\gamma \textit{l}(x^*)+(1-\gamma) \textit{g}(x^*)} \propto \left( \gamma +\frac{\textit{g}(x^*)}{\textit{l}(x)} (1-\gamma)\right)^{-1}
+\end{equation}
+
+
+The TPE approach then maximises the $\textrm{EI}$ by drawing values from $\textit{l}(x^*)$, and maximizing the ratio $\textit{l}(x^*)/\textit{g}(x^*)$, which in term maximises the $\textrm{EI}$ \cite{tdshyper}. In practice, the fact that the surrogate function is not exactly the objective may mean that the hyperparameter choice offers no improvement in the objective function, meaning the surrogate function needs to be updated, and the use of a distribution $\textit{l}(x^*)$ helps to balance the trade-off between exploration and exploitation. In practical terms, this can reasonably be thought of as effectively Monte-Carlo Markov Chain fitting hyperparameter values.
+
+\subsection{Initial Optimisation Efforts}
+
+To investigate this potential technique, I utilized the Hyperas \cite{hyperas} Keras wrapper around Hyperopt \cite{hyperopt}, one of the most commonly used python packages for performing TPE analysis. However, given that this approach requires (at least partially) training a classifier for every point in hyperparameter space explored, this is orders of magnitude more computationally costly than simply training a single deep learning classifier with a single hyperparameter configuration. It was also not immediately clear what the best approach to take with these methods given realistically finite compute power and time. Essentially one has to choose between the number of epochs to train a model for each point in hyperparameter space, the amount of data used for training and the number and range of hyperparameter space points probed. The optimal configuration for this was not known at the starting point of this research. In practice, VRAM constraints limit the maximum possible range of hyperparameter values probed, extending this range too far (for example) in terms of number of layers will eventually exhaust finite available VRAM and cause crashes.
+
+The initial optimisation efforts revolved around training a ConvLSTM2D classifier for a single epoch on a comparatively small number of events (~19574 simulated events) on a single GPU, using performance on a similarly small amount of validation data as a metric. The aim was to find the best 'starting position' for the training, the network configuration obtained through the initial optimisation was then trained for 100 epochs. Four successive attempts at this were made, resulting in the presented 'opt4' configuration that yielded performance superior to random number generation on the real data. 
+
+
+\begin{table}[h]
+    \centering
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{c|c|c|c|c|c|c}
+    \textbf{Run} & $\textbf{N}_{on}$ & $\textbf{N}_{off}$ & \textbf{Significance} & \textbf{Signal Rate} & \textbf{Error on Signal Rate} & \textbf{Background Rate} \\
+    & (events)&(events) & ($\sigma$) & ($\gamma$/min) & ($\gamma$/min) &( events/min) \\
+    \hline
+    64080 &  175 & 89.17 &   7.3 & 4.285   &0.688 & 4.451\\
+    \end{tabular}
+    }
+    \caption{Anasum output for custom simulations alone run.}
+    \label{table:RNG}
+\end{table}
+
+\begin{figure}[] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=\columnwidth]{figures/crabrun2trainlog.png}
+
+        \caption{
+                \label{fig:cr2_trainlog} The training curve for the custom simulation alone run.
+        }
+\end{figure}
+
+\begin{figure}[] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=\columnwidth]{figures/crabrun2_sigeff.png}
+
+        \caption{
+                \label{fig:cr2_sigeff} The test signal efficiency curve for the custom simulation alone run.
+        }
+\end{figure}
+
+\begin{figure}[] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=\columnwidth]{figures/crabrun2_hist.png}
+
+        \caption{
+                \label{fig:cr2_hist} The test gammaness histogram for the custom simulation alone run. The model shows poor convergence on validation data.
+        }
+\end{figure}
+\begin{table}[h]
+    \centering
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{c|c|c|c|c|c|c}
+    \textbf{Run} & $\textbf{N}_{on}$ & $\textbf{N}_{off}$ & \textbf{Significance} & \textbf{Signal Rate} & \textbf{Error on Signal Rate} & \textbf{Background Rate} \\
+    & (events) & (events) & ($\sigma$) & ($\gamma$/min) & ($\gamma$/min) & (events/min) \\
+    \hline
+    64080 &  573 & 280.17 & 13.9 & 14.617  & 1.243 & 13.985\\
+    \end{tabular}
+    }
+    \caption{Anasum output for the opt4 run, without applying a strenuous multiplicity cut.}
+    \label{table:opt4}
+\end{table}
+
+This detection is a mild function of multiplicity, the significance can reach 16.1 $\sigma$ if a telescope multiplicity cut of 4 is imposed, this is a result of the signal to noise ratio being higher for such events. The standard VERITAS analysis, reliant upon BDTs, achieves a 21 $\sigma$ detection on the same data without this strong multiplicity cut, far superior to this. \footnote{Details of this analysis can be found at \url{https://veritas.sao.arizona.edu/wiki/index.php/Eventdisplay_Manual:_event_display}}
+
+\begin{table}[ht]
+    \centering
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{ccc|c|c|c}
+    \textbf{Block} & \textbf{Layer} & \textbf{Parameter} & \textbf{Potential Values}& \textbf{Optimal Value Diffuse Source} \\
+    \hline
+    \hline
+    \textbf{Block 1} & ConvLSTM2D & Number of Filters & Choice(10,20,30,40) &  10 \\
+                     &            & Kernel Size & Choice((2,2),(3, 3),(4,4),(5,5)) & (4,4) \\
+                     &            & Kernel L2 Regularizer Rate & Uniform(0,1) & 0.0797 \\
+                     &            & Dropout Rate & Uniform(0,1) &  0.0361 \\
+                     &            & Recurrent Dropout Rate & Uniform(0,1) & 0.382 \\
+    \hline
+    \textbf{Block 2} & ConvLSTM2D & Number of Filters & Choice(10,20,30,40) & 10 \\
+                     &            & Kernel Size & Choice((2,2),(3, 3),(4,4),(5,5)) &  (2,2) \\
+                     &            & Kernel L2 Regularizer Rate & Uniform(0,1) & 0.576 \\
+                     &            & Dropout Rate & Uniform(0,1) & 0.371 \\
+                     &            & Recurrent Dropout Rate & Uniform(0,1) & 0.510 \\
+    \hline
+    \textbf{Block 3} & ConvLSTM2D & Number of Filters & Choice(10,20,30,40) & 40 \\
+                     &            & Kernel Size & Choice((2,2),(3, 3),(4,4),(5,5) & (2,2) \\
+                     &            & Dropout Rate & Uniform(0,1) & 0.0 \\
+                     &            & Recurrent Dropout Rate & Uniform(0,1) & 0.1 \\
+    \hline
+    \textbf{Block 4} &.           & Include Block & Choice(Yes,No)                      & Yes \\
+                     & ConvLSTM2D & Number of Filters & Choice(10,20,30,40) &  30 \\
+                     &            & Kernel Size & Choice((2,2),(3, 3),(4,4),(5,5))  & (5,5) \\
+                     &            & Dropout Rate & Uniform(0,1) &  0.5056 &\\
+    \hline
+    \textbf{Block 5} & GlobalAveragePooling3D &  - & - &- \\
+    \hline
+    \textbf{Block 7} & Dense      & Number of Units & Choice(10,50,100,200) & 100 \\
+    \hline
+    \textbf{Block 8} & Dense      & - & - & - \\
+
+
+    \end{tabular}
+    }
+    \caption{Summary of hyperparameter space and selected configuration for the initial single core optimisation that produced the opt4 configuration.}
+    \label{table:runsopt4}
+\end{table}
+
+\begin{figure}[] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=\columnwidth]{figures/crabrun2opt4trainlog.png}
+
+        \caption{
+                \label{fig:opt4_trainlog} The training curve for the opt4 run.
+        }
+\end{figure}
+
+Curiously the validation data training curve appears to converge in this one specific instance, but it is unclear if this relates to the ConvLSTM2D classifier learning meaningful features in the simulated images or if this is simply a coincidence. 
+
+\begin{figure}[ht] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=\columnwidth]{figures/crabrun2opt4_sigeff.png}
+
+        \caption{
+                \label{fig:opt4_sigeff} The test signal efficiency curve for the opt4 run.
+        }
+\end{figure}
+
+\begin{figure}[ht] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=\columnwidth]{figures/crabrun2opt4_hist.png}
+
+        \caption{
+                \label{fig:opt4_hist} The test gammaness histogram for the opt4 run.
+        }
+\end{figure}
+\begin{figure}[ht] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=0.8\columnwidth]{figures/opt4_skysig.png}
+
+        \caption{
+                \label{fig:opt4_skysig} The sky significance for the 'opt4' configuration on run 64080.
+        }
+\end{figure}
+\begin{figure}[ht] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=0.5\columnwidth]{figures/opt4_sig.png}
+
+        \caption{
+                \label{fig:opt4_sig1D} The 1 Dimensional significance for the 'opt4' configuration on run 64080.
+        }
+\end{figure}
+
+\section{Parallelised Optimisation Attempts}
+\subsection{Construction and Stress Testing of a GPU upgrade to the Glamdring cluster}
+\subsection{Optimisation Configurations and Results}
+The next three figures and three tables show three attempts to perform Bayesian optimisation using hyperas in parallel. Four of the machines had two NVidia 2080Tis attached, the final had only one. The machines with multiple GPUs made use of Tensroflow's \textit{MirroredStrategy} approach, so the optimisation worker effectively saw a single GPU with double the VRAM. We'll refer to these three optimisation attempts as attempt A, attempt B and attempt C, after each optimisation attempt the best performing model was trained with the complete dataset for more epochs, similar to the strategy on the single core. In all attempts, a unique configuration database was created, with each point in hyperparameter space being allocated a unique working directory. To operate, the optimiser consisted of a head process working on the glamdring login node to determine hyperparameter point selection, and up to 5 worker processes on the \textit{glamdring} GPU nodes. Progress was checkpointed such that there were no information losses if a worker process failed. The classifier trained on a certain subset of training data for a certain number of epochs for each hyperparameter configuration, and the accuracy on test data after this training was used as the metric. Each of these test scores is shown as a blue cross, running averages and moving averages (over the maximum 9 parallel GPUs) are also shown. Attempt A had a similar hyperparameter space to the initial single core optimisation run that produced the opt4 configuration, this hyperparameter space was increased for the subsequent attempts B and C. It should be noted that in particular optimisation attempt C, our final attempt to generate a configuration superior to the opt4 result, was extremely computationally intensive, representing the results of around 5800 GPU hours of compute time. The results for attempt C shown here represent around approximately 5760 GPU compute hours.
+
+\begin{table}[ht]
+    \centering
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{c|c|c|c}
+    \textbf{Attempt} & \textbf{A} & \textbf{B} & \textbf{C} \\
+    \hline
+    \textbf{No. Training Events}                       & 39148 & 19574 & 117574 \\
+    \textbf{No. Test Events}                           & 39200 & 19600 & 39200 \\
+    \textbf{Epochs Training per Hyperparameter Point}  & 5     & 1     & 25 \\
+    \textbf{No. Hyperparameter Points Sampled}         & 2000  & 1000  & 500 \\
+    \textbf{Best Test Accuracy (\%)}                   & 77.36 & 75.9  & 86.4 \\
+    \end{tabular}
+    }
+    \caption{Summary of parallelised optimisation runs and the amount of data used for each. Values presented here represent the number of training events, test events, and test performance for the training and evaluation during the Bayesian optimisation process. The best performing models from each optimisation run were then trained and tested again with the complete dataset for more epochs before being applied to the real data.}
+    \label{table:optsum}
+\end{table}
+
+\begin{table}[ht]
+    \centering
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{ccc|c|c|c|c}
+    \textbf{Block} & \textbf{Layer} & \textbf{Parameter} & \textbf{Potential Values}& \textbf{Optimal Value Attempt A}& \textbf{Optimal Value Attempt B} \\
+    \hline
+    \hline
+    \textbf{Block 1} & ConvLSTM2D & Number of Filters & Choice(10,20,30,40) &  20 & 10\\
+                     &            & Kernel Size & Choice((2,2),(3, 3),(4,4),(5,5)) & (4,4)& (4,4) \\
+                     &            & Kernel L2 Regularizer Rate & Uniform(0,1) & 0.402 & 0.404 \\
+                     &            & Dropout Rate & Uniform(0,1) &  0.462 & 0.536\\
+                     &            & Recurrent Dropout Rate & Uniform(0,1) & 0.552& 0.353\\
+    \hline
+    \textbf{Block 2} & ConvLSTM2D & Number of Filters & Choice(10,20,30,40) & 10& 20\\
+                     &            & Kernel Size & Choice((2,2),(3, 3),(4,4),(5,5)) &  (2,2)& (4,4)\\
+                     &            & Kernel L2 Regularizer Rate & Uniform(0,1) & 0.234& 0.796\\
+                     &            & Dropout Rate & Uniform(0,1) & 0.774& 0.563\\
+                     &            & Recurrent Dropout Rate & Uniform(0,1) & 0.000& 0.116\\
+    \hline
+    \textbf{Block 3} & ConvLSTM2D & Number of Filters & Choice(10,20,30,40) & 30& 30\\
+                     &            & Kernel Size & Choice((2,2),(3, 3),(4,4),(5,5) & (2,2)& (4,4) \\
+                     &            & Dropout Rate & Uniform(0,1) & 0.444& 0.105\\
+    \hline
+    \textbf{Block 4} &.           & Include Block & Choice(Yes,No)                      & Yes& Yes \\
+                     & ConvLSTM2D & Number of Filters & Choice(10,20,30,40) &  40& 30\\
+                     &            & Kernel Size & Choice((2,2),(3, 3),(4,4),(5,5))  & (5,5)& (5,5)\\
+                     &            & Dropout Rate & Uniform(0,1) &  0.720 & 0.652\\
+    \hline
+    \textbf{Block 5} & GlobalAveragePooling3D &  - & - &- &-\\
+    \hline
+    \textbf{Block 7} & Dense      & Number of Units & Choice(10,50,100,200) & 10 & 100\\
+    \hline
+    \textbf{Block 8} & Dense      & - & - & - \\
+
+
+    \end{tabular}
+    }
+    \caption{Summary of hyperparameter space and selected configuration for the initial parallelised optimisation runs, attempts A and B.}
+    \label{table:runsAB}
+\end{table}
+
+\begin{table}[ht]
+    \centering
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{ccc|c|c}
+    \textbf{Block} & \textbf{Layer} & \textbf{Parameter} & \textbf{Potential Values} & \textbf{Optimal Value Attempt C} \\
+    \hline
+    \hline
+    \textbf{Block 1} & ConvLSTM2D & Number of Filters & Choice(10,20,30,40,50,60) &  10 \\
+                     &            & Kernel Size & Choice((2,2),(3, 3),(4,4),(5,5),(6,6),(7,7)) & (4,4) \\
+                     &            & Kernel L2 Regularizer Rate & Uniform(0,1) & 0.366 \\
+                     &            & Dropout Rate & Uniform(0,1)  & 0.414 \\
+                     &            & Recurrent Dropout Rate & Uniform(0,1) & 0.107 \\
+    \hline
+    \textbf{Block 2} & ConvLSTM2D & Number of Filters & Choice(10,20,30,40,50,60) & 10 \\
+                     &            & Kernel Size & Choice((2,2),(3, 3),(4,4),(5,5),(6,6),(7,7)) &  (2,2) \\
+                     &            & Kernel L2 Regularizer Rate & Uniform(0,1) & 0.167 \\
+                     &            & Dropout Rate & Uniform(0,1) & 0.863 \\
+                     &            & Recurrent Dropout Rate & Uniform(0,1) & 0.321 \\
+    \hline
+    \textbf{Block 3} & ConvLSTM2D & Number of Filters & Choice(10,20,30,40,50,60) & 40 \\
+                     &            & Kernel Size & Choice((2,2),(3, 3),(4,4),(5,5),(6,6),(7,7)) & (2,2) \\
+                     &            & Kernel L2 Regularizer Rate & Uniform(0,1) & 0.219 \\
+                     &            & Dropout Rate & Uniform(0,1) & 0.287 \\
+                     &            & Recurrent Dropout Rate & Uniform(0,1) & 0.697 \\
+    \hline
+    \textbf{Block 4} & ConvLSTM2D & Number of Filters & Choice(10,20,30,40,50,60) &  30 \\
+                     &            & Kernel Size & Choice((2,2),(3, 3),(4,4),(5,5),(6,6),(7,7))  & (3,3) \\
+                     &            & Dropout Rate & Uniform(0,1) &  0.483 \\
+    \hline
+    \textbf{Block 5} &            & Include Block & Choice(Yes, No)                     & Yes \\
+                     & ConvLSTM2D & Number of Filters & Choice(10,20,30,40,50,60)  & 30 \\
+                     &            & Kernel Size & Choice((2,2),(3, 3),(4,4),(5,5),(6,6),(7,7))  & (3,3) \\
+                     &            & Dropout Rate & Uniform(0,1) &  0.020 \\
+    \hline
+    \textbf{Block 6} &            & Include Block & Choice(Yes, No)                     & Yes \\
+                     & ConvLSTM2D & Number of Filters & Choice(10,20,30,40,50,60) &  30 \\
+                     &            & Kernel Size & Choice((2,2),(3, 3),(4,4),(5,5),(6,6),(7,7))  & (3,3) \\
+                     &            & Dropout Rate & Uniform(0,1) & 0.553 \\
+    \hline
+    \textbf{Block 5} & GlobalAveragePooling3D &  - & - &- \\
+    \hline
+    \textbf{Block 6} &            & Include Block & Choice(Yes, No)                     &  Yes \\
+                     & Dense      & Number of Units & Choice(10,50,100,200) & 10 \\
+                     &            & Dropout Rate & Uniform(0,1) & 0.190 \\
+    \hline
+    \textbf{Block 7} &            & Include Block & Choice(Yes, No)                     &  Yes \\
+                     & Dense      & Number of Units & Choice(10,50,100,200) & 200 \\
+                     &            & Dropout Rate & Uniform(0,1) & 0.743 \\
+    \hline
+    \textbf{Block 8} &            & Include Block & Choice(Yes, No)                     &  Yes \\
+                     & Dense      & Number of Units & Choice(10,50,100,200) & 200 \\
+                     &            & Dropout Rate & Uniform(0,1) & 0.107 \\
+    \hline
+    \textbf{Block 9} & Dense      &  - & - \\
+
+
+
+
+    \end{tabular}
+    }
+    \caption{Summary of hyperparameter space and selected configuration for the final parallelised optimisation run, attempt C.}
+    \label{table:runsC}
+\end{table}
+
+\begin{figure}[] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=\columnwidth]{figures/convplot_testfolders3.png}
+
+        \caption{
+                \label{fig:convplot_testfolders3} Training optimisation for longer Bayesian optimisation run attempt A
+        }
+\end{figure}
+\begin{figure}[] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=\columnwidth]{figures/convplot_febtry.png}
+
+        \caption{
+                \label{fig:convplot_febtry} Training optimisation for longer Bayesian optimisation run attempt B
+        }
+\end{figure}
+
+\begin{figure}[] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=\columnwidth]{figures/convplot_longmoredata.png}
+
+        \caption{
+                \label{fig:convplot_longmoredata} Training optimisation for Bayesian optimisation attempt C
+        }
+\end{figure}
+
+Further runs of Bayesian optimisation using the parallelised approach failed to generate a configuration that yielded superior results on VERITAS simulations.
+
+Simulated data training curves and signal efficiency curves for the best model configuration for optimisation attempt C, trained with the complete dataset.
+
+\begin{figure}[] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=\columnwidth]{figures/6vimrcb1485481664trainlog.png}
+
+        \caption{
+                \label{fig:6vimrcb1485481664_trainlog} Training accuracy curve for the best performing model from optimisation attempt C, trained for 100 epochs with the complete dataset.
+        }
+\end{figure}
+
+\begin{figure}[] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=\columnwidth]{figures/6vimrcb1485481664_sigeff.png}
+
+        \caption{Test signal efficiency curve for the best performing model from optimisation attempt C, trained for 100 epochs with the complete dataset.
+                \label{fig:6vimrcb1485481664_sigeff} 
+        }
+\end{figure}
+
+
+\section{Conclusion}
+In this chapter, I have demonstrated a deep learning pipeline capable of use with the VERITAS telescopes, and showed that a combination of ConvLSTM2D classifiers, custom simulations and Bayesian Optimisation can yield a definite detection of the Crab Nebula (the first with an IACT array using such methods that did not require conventional tailcut cleaning). However, there are significant issues with this approach that probably limit its current efficacy for CTA that require further detailed study. In particular, it is clear that the modelling of NSB used by current generation IACTs is far too simplistic for use with deep learning event classification methods for CTA. It is also clear that there is a very significant hyperparameter dependence problem with ConvLSTM2D and similar classifiers which limits their use in practice, and the computational cost of performing deep learning analysis remains prohibitive. It should be noted that this combination of optimisation and custom simulations is likely to be computationally prohibitive in a real observing scenario. Our aim was to determine the maximal possible potential for these deep learning methods, and we performed this work operating under the hope that at some point new transfer learning, optimisation and simulation approaches might be able to bridge the gap in computing power needed to currently perform this analysis. Given these results, it seems likely that in order to fully leverage the potential for deep learning based analyses we must either look to new methods of interpretation of IACT data, such as leveraging high precision timing information as presented in Chapter \ref{ch:3-TimingInfo}, or to new deep learning techniques beyond conventional CNNs. That said, it also appears that we have discovered a weak correlation between simulated accuracy on test data and performance on real data.
+Though ultimately, as none of the longer, parallelised optimisation runs produced a configuration that outperformed the opt4 configuration after final training and testing on the whole simulated dataset, combined with the convergence appearing in attempt C's optimisation curve, suggests that we have hit the simulation accuracy limit (87\%) for this selection of cuts and this data. 
