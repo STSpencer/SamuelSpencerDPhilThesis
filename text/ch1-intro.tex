@@ -6,6 +6,32 @@ A wide variety of astrophysical objects produce gamma-rays, including supernova 
 The first two of these problems can be solved by observing in space, and the very successful Fermi mission has operated for over a decade. However, the energy range of its Large Area Telescope (LAT) survey instrument is limited to between 20MeV and 300GeV because of the comparatively small effective of the detector. As such, in order to observe higher energy photons (in the high GeV-TeV energy range) we must detect them indirectly. This can be performed using the Imaging Atmospheric Cherenkov Telescope  (IACT) method, pioneered by Jelly and Galbraith in 1953 \cite{G+J}. 
 
 \section{Current Generation Indirect Gamma-ray Detection Instruments}
+\subsection{The Cherenkov Effect}
+
+\begin{figure}[ht] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=0.5\columnwidth]{figures/Cherenkov.png}
+
+        % note that in above figure file name, "sr_setup",
+        % the file extension is missing. LaTeX is smart enough to find
+        % apropriate one (i.e. pdf, png, etc.)
+        % You can add this extention yourself as it seen below
+        % both notations are correct but above has more flexibility
+        %\includegraphics[width=1.0\columnwidth]{sr_setup.pdf}
+        \caption{
+                \label{fig:cherenkov} % spaces are big no-no withing labels
+                % things like fig: are optional in the label but it helps
+                % to orient yourself when you have multiple figures,
+                % equations and tables
+                The geometry of the Cherenkov effect, assuming no dispersion. Image credit: A. Horvarth.
+        }
+\end{figure}
+The Cherenkov opening angle $\theta_c$
+\begin{equation}
+    \cos\theta_c=\frac{1}{n\beta}
+\end{equation}
+
+where $n$ is the refractive index, $\beta$=$v/c$ where $v$ is the velocity of light in the medium and $c$ is the speed of light in a vacuum.
 \subsection{IACT Basics}
 
 \begin{figure}[ht] 
@@ -38,6 +64,9 @@ The generated particles continue to interact, emitting photons via Brehmsstrahlu
 
 \subsection{H.E.S.S.}
 \subsection{VERITAS}
+VERITAS consists of 4 10 meter parabolic, single mirror IACTs at the Fred Lawrence Whipple Observatory in Arizona (the original VERITAS design intended 8 IACTs). It is designed to give optimal sensitivity in 100GeV to 10TeV energy band.
+
+
 \subsection{MAGIC}
 \subsection{FACT}
 The \textit{First G-APD Cherenkov Telescope} (FACT) is an autonomous upgrade of a former HEGRA Cherenkov telescope, notable for being the first instrument to attempt the use of Silicon Photomultipliers in Cherenkov astronomy. Given it is a single IACT and not an array, however, its sensitivity is limited. As such it largely operates as a blazar monitoring instrument, such that other instruments can be notified in the event of a flare. 
@@ -46,14 +75,14 @@ FACT arguably has one of the most advanced analysis chains of current IACTs, whi
 
 \subsection{HAWC, Tibet AS-$\gamma$ and LHASSO}
 
-The IACT technique is not the only means of indirect $\gamma$-ray detection from the ground. At sufficiently high altitude, one can use Water Cherenkov detectors to directly observe the electrons from an incident shower, and then use arrival time information as a background rejection method. This is the principle underlying the successful \textit{High Altitude Water Cherenkov} (HAWC) observatory in Mexico, as well the principle behind the Chinese Tibet AS-$\gamma$ and \textit{Large High Altitude Air Shower Observatory} (LHASSO) experiments (the under construction LHASSO detector will also have small IACTs on site). These complement IACTs with their main advantage of being that these are survey instruments with a wide field of view, higher operational energy range and nearly $100\%$ duty cycle, but comparatively poor angular resolution and background rejection. 
+The IACT technique is not the only means of indirect $\gamma$-ray detection from the ground. At sufficiently high altitude, one can use Water Cherenkov detectors to directly observe the electrons from an incident shower, and then use arrival time information as a background rejection method. This is the key principle underlying the successful \textit{High Altitude Water Cherenkov} (HAWC) observatory in Mexico, as well the principle behind the Chinese Tibet AS-$\gamma$ and \textit{Large High Altitude Air Shower Observatory} (LHASSO) experiments (the under construction LHASSO detector will also have small IACTs on site). These complement IACTs with their main advantage of being that these are survey instruments with a wide field of view, higher operational energy range and nearly $100\%$ duty cycle, but comparatively poor angular resolution and background rejection. 
 
 \section{The Cherenkov Telescope Array and Associated Instruments}
 The Cherenkov Telescope Array (CTA) is an ambitious project to build a next-generation VHE $\gamma$-ray facility, which aims to improve on the sensitivity of the current generation instruments by roughly an order of magnitude \cite{scienceCTA}. The CTA consortium, involved in directing CTA Observatory science goals and array design, consists of over 1400 scientists from 31 countries around the globe. Given the large energy range (20 GeV to 300 TeV) that CTA will operate  over \cite{scienceCTA}, three classes of IACT are required. These are designated as the Small-, Medium- and Large-Sized Telescopes (SSTs, MSTs and LSTs). The 23-meter diameter LSTs are designed for high sensitivity observations of $\gamma$-rays over the 20 GeV-150 GeV energy range, increasing the overlap in sensitivity with space based missions such as the Fermi $\gamma$-ray Space Telescope \cite{Fermi}. The SSTs will be the smallest (approximately 4 m diameter) but most numerous telescopes, and will be spread out over a large ($\sim$4 km$^2$) area in order to maximise CTA's effective area for $\gamma$-ray energies over 5 TeV. The MSTs will provide unprecedented sensitivity to cosmic $\gamma$-ray fluxes in the intermediate energy range. The baseline design of CTA consists of 99 telescopes (4 LSTs, 25 MSTs, 70 SSTs) placed on a southern site at Cerro Paranal in Chile, whereas a smaller array of 19 telescopes (4 LSTs, 15 MSTs, and no SSTs) will be placed on a northern site on Spanish Canary Island of La Palma. In this way, the CTA Observatory will cover the whole sky \cite{scienceCTA}. However, at the time of writing, the current cost book allows for no LSTs and only 15MSTs and 40 SSTs on the Southern Site. 
 
-\subsection{GCT and ASTRI}
+\subsection{GCT, ASTRI and the SST Harmonization Process}
 
-There are two SST dual-mirror prototype designs that CHEC cameras can be attached to, the French led Gamma Cherenkov Telescope (GCT), and the Italian led Astrofisica con Specchi a Tecnologia Replicante Italiana (ASTRI) instrument. Both share a Schwartzchild-Couder optical design, which allows for a compact silicon photomultiplier camera as well as a more uniform Point Spread Function (PSF) across the field of view. Following a harmonisation process, the ASTRI optical design was selected for the SSTs, taking into account lessons learned from all prototypes. But for the purposes of the results in this thesis which are primarily concerned with the camera, these two optical structures are interchangeable.
+There are two SST dual-mirror prototype designs that CHEC cameras can be attached to, the French led Gamma Cherenkov Telescope (GCT), and the Italian led Astrofisica con Specchi a Tecnologia Replicante Italiana (ASTRI) instrument. Both share a Schwartzchild-Couder optical design, which allows for a compact silicon photomultiplier camera as well as a more uniform Point Spread Function (PSF) across the field of view. Following a harmonisation process, the ASTRI optical design with a CHEC-type camera was selected for the SSTs, taking into account lessons learned from all prototypes. But for the purposes of the results in this thesis which are primarily concerned with the camera, these two optical structures are interchangeable (in Chapter \ref{ch:3-TimingInfo} we consider CHEC-S with GCT as our instrument, whereas in the later  Chapter \ref{ch:5-CHECNSB} we consider CHEC-S on ASTRI). 
 
 \begin{figure}[ht] 
         % read manual to see what [ht] means and for other possible options
@@ -91,7 +120,7 @@ There are two SST dual-mirror prototype designs that CHEC cameras can be attache
                 The CHEC-S CAD model with key elements highlighted, taken from \cite{rwhite}.
         }
 \end{figure}
-The UK's main material contribution to CTA construction is planned to be a variant of the Compact High Energy Camera (CHEC), which is designed to work with SST structures that have a dual-mirror (Swartzchild-Couder) optical design. CHEC was designed to be compatible with both the GCT and ASTRI optical structures.  Two operational CHEC prototypes have already been built. The first, CHEC-M, has as its light detectors 32 Multi-Anode Photomultipliers (MAPMs)\cite{tomthesis}. These consist of a block of 8x8 pixels, the signals from which are digitised at a rate of $1\mathrm{GSa}/\mathrm{s}$ \cite{tomthesis} by front end electronics based upon the custom TARGET application-specific integrated circuit (ASIC) \cite{checmpaper}. When it is triggered by two or more four pixel blocks exceeding a discriminator threshold, the data is read out of the camera over a 96ns window containing 96 photoelectron samples. A refined prototype, CHEC-S, is currently undergoing testing at the Max Planck Institute for Nuclear Physics in Heidelberg. CHEC-S contains a refinement of the TARGET-based electronics of its predecessor, but replaces the MAPMs with Silicon Based Photomultipliers (SiPMs). These have the advantage of being more durable than MAPMs, but are also cheaper and can operate in conditions with a higher night sky background (NSB). CHEC is designed to work with SST structures that have a dual-mirror (Swartzschild-Couder) optical design. This design allows for a compact camera (approximately 0.4 m diameter) with small scale photosensors (6/7 mm, corresponding to roughly a third of the plate scale of a comparable single mirror design) and a wide field of view ($\sim$0.2 degrees per pixel). There are two prototype telescope designs that CHEC cameras can be attached to: the French-led \textit{Gamma Cherenkov Telescope} (GCT), and the Italian-led \textit{Astrofisica con Specchi a Tecnologia Replicante Italiana} (ASTRI) instrument. In June 2019, it was decided that the final CTA-SST design will be based on ASTRI and CHEC, taking into account the experience gained from all SST designs. Two operational CHEC prototypes have already been built, the most recent of which (CHEC-S) is currently undergoing testing at the Max Planck Institute for Nuclear Physics in Heidelberg, and has recently been used on an observing campaign on the ASTRI prototype. Further details regarding the science performance of the SST sub-array and the complete CTA instrument can be found in Maier et. al \cite{gernotCTA} and Hassan et. al \cite{tarekCTA}.
+The UK's main material contribution to CTA construction is planned to be a variant of the Compact High Energy Camera (CHEC), which is designed to work with SST structures that have a dual-mirror (Swartzchild-Couder) optical design. CHEC was designed to be compatible with both the GCT and ASTRI optical structures.  Two operational CHEC prototypes have already been built. The first, CHEC-M, has as its light detectors 32 Multi-Anode Photomultipliers (MAPMs)\cite{tomthesis}. These consist of a block of 8x8 pixels, the signals from which are digitised at a rate of $1\mathrm{GSa}/\mathrm{s}$ \cite{tomthesis} by front end electronics based upon the custom TARGET application-specific integrated circuit (ASIC) \cite{checmpaper}. When it is triggered by two or more four pixel blocks exceeding a discriminator threshold, the data is read out of the camera over a 96ns window containing 96 photoelectron samples. A refined prototype, CHEC-S, is currently undergoing testing at the Max Planck Institute for Nuclear Physics in Heidelberg. CHEC-S contains a refinement of the TARGET-based electronics of its predecessor, but replaces the MAPMs with Silicon Based Photomultipliers (SiPMs). These have the advantage of being more durable than MAPMs, but are also cheaper and can operate in conditions with a higher night sky background (NSB). CHEC is designed to work with SST structures that have a dual-mirror (Swartzschild-Couder) optical design. This design allows for a compact camera (approximately 0.4 m diameter) with small scale photosensors (6/7 mm, corresponding to roughly a third of the plate scale of a comparable single mirror design) and a wide field of view ($\sim$0.2 degrees per pixel). Two operational CHEC prototypes have already been built, the most recent of which (CHEC-S) is currently undergoing testing at the Max Planck Institute for Nuclear Physics in Heidelberg, and has recently been used on an observing campaign on the ASTRI prototype. Further details regarding the science performance of the SST sub-array and the complete CTA instrument can be found in Maier et. al \cite{gernotCTA} and Hassan et. al \cite{tarekCTA}.
 
 Both CHEC cameras and the upcoming SSTCAM have inbuilt self-calibration LED flasher systems, designed to flat-field the camera. The flashers on the CHEC prototypes were attached to the camera corners and reflected off the secondary mirror, for the final SSTCAM design the flasher will most likely be situated behind the secondary mirror and shine through. 
 
@@ -151,17 +180,25 @@ Night Sky Background (NSB), which refers to the light detected in Cherenkov came
     \item Atmospheric Air glow emission lines, particularly from atomic oxygen, hydroxide and sodium.
     \item Moonlight
     \item Stars
-    \item Zodiacal light
+    \item Zodiacal light, along with diffuse galactic light and extragalactic background light (though these contributions are small). \cite{nsbref}
     \item Light Pollution from Population Centres
 \end{itemize}
 
-Historically, analytic studies of NSB have been limited, as the standard CORSIKA and sim\_telarray simulation packages do not attempt to model NSB in a particularly accurate way, at most allowing for it to be represented as a constant gradient across the camera. Most previous work on NSB has focused on direct observations with photomultipliers \cite{BandE}. 
+Historically, analytic studies of NSB have been limited, as the standard CORSIKA and sim\_telarray simulation packages do not attempt to model NSB in a particularly realistic way. Most previous work on NSB has focused on direct observations with photomultipliers \cite{BandE}. 
 
 \section{Standard IACT Stages of Event Analysis}\label{app:imaging}
 
 \subsection{Trigger Selection}
 
 Trigger selection is a feature of an IACT array designed to automatically reject events with a low probability of being astrophysical gamma-rays in the readouts of the camera. CHEC-S, for example, only reads out the camera photomultipliers if two adjacent superpixels (blocks of four adjacent pixels) passes a comparator check. The VERITAS trigger is slightly more complex, it consists of a single pixel trigger which acts on individual pixels (and includes timing analysis), a camera level trigger which works on the pattern and relative timing of the single pixel triggers, and an array trigger which requires that more than two telescopes are triggered in order such that an event is stored to disk\cite{veritastrigger}. This array-level trigger in particular significantly reduces the number of false triggers associated with muons passing through the instrument and telescope optics, as it is unlikely a single cosmic ray muon will generate sufficient Cherenkov light to trigger a second VERITAS telescope a few tens of meters away. A combination of trigger selection and simple parameter-based cuts can reduce the signal to background ratio to 1:1 for a bright source like the Crab Nebula using a current generation instrument like H.E.S.S. \cite{Berge07}.
+
+\subsection{Pedestal Subtraction/Calibration}
+
+Electronic noise present in IACT camera data needs to be removed. For this purpose, measurements of the camera noise are taken when the camera is shut off from the outside environent with the shutter closed (similar to dark framing for optical astronomy). These measured pedestals are then subtracted from the observed live data.
+
+\subsection{Charge Integration}
+
+Charge integration is the process of taking a calibrated PMT trace and extracting the number of photoelectrons. Various schemes exist for performing this operation, CHEC/SSTCAM relies on a cross-correlation template fitting model developed by J. Watson.
 
 \subsection{Tailcut Cleaning}
 
@@ -185,7 +222,7 @@ Before conventional IACT analysis, the sensitivity of event classification and r
                 The definition of Hillas parameters, taken from \cite{ctapipe}.
         }
 \end{figure}
-Hillas Parameters form the basis of the methods for event discrimination in the current generation of IACTs, and were instrumental in obtaining the first reliable gamma-ray source detection from the ground \cite{whipple} (much of the previous work in the years following 1953 centred on Pulsar detection and has since largely been disproved \cite{paulathesis}). They are obtained \cite{tomthesis} \cite{weekestev} from the second moments of an IACT camera image (constructed from the total integrated charge for each photomultiplier pixel), defined as 
+Hillas Parameters form the basis of the methods for event discrimination in the current generation of IACTs, and were instrumental in obtaining the first reliable gamma-ray source detection of the Crab nebula from the ground \cite{whipple} (much of the previous work in the years following 1953 centred on Pulsar detection and has since largely been disproved \cite{paulathesis}). They are obtained \cite{tomthesis} \cite{weekestev} from the second moments of an IACT camera image (constructed from the total integrated charge for each photomultiplier pixel), defined as 
 \begin{align*}
 \langle x^2 \rangle = \frac{\sum_i I_i x_i^2}{\sum_i I_i} && \langle y^2 \rangle = \frac{\sum_i I_i y_i^2}{\sum_i I_i}
 \end{align*}
@@ -230,19 +267,28 @@ Hillas parameter based techniques don't however take advantage of the full camer
         }
 \end{figure}
 
+\subsection{Event Selection Cuts and Run Selection}
+
+IACT observations are normally conducted in runs, where the IACT array tracks and observes a single source. The length of these runs varies, but most IACT observatories use between 20 and 30 minutes. This is as to obtain a sufficient number of events to accurately model background, whilst observation conditions are roughly constant.
+
+Most IACT analysis begins with Hillas parameter cuts on the data to remove obviously hadronic events (with very high MRSW) and events far from the desired source (so-called theta squared cuts).
+It is also common to remove runs or events from an IACT analysis for a variety of reasons. The data from a run may be low quality due to poor weather conditions, hardware or tracking issues or high zenith angle (where simulation accuracy drops due to the complexity of modelling the atmosphere correctly). Most IACT analyses use multiple runs per source, though the work in Chapter \ref{ch:4-VERITASRealData} considers only a single VERITAS run as we attempt to match the data more closely.
+
 \subsection{ON/OFF Region and Reflected Region Analysis}
 So far we have focused on Cherenkov camera based background rejection, however this only reduces the signal to background rate (by around a factor of 100) to ~1:1 for bright sources. As such, there is a need for a higher level background rejection method, similar to aperture photometry in optical astronomy. The simplest method possible is to take one ON region and one OFF region at the same right ascension but differing declination. The disadvantage of this is the loss of time on source. An alternative developed by the Whipple observatory is so called 'Wobble Mode', where the telescope wobbles around the source in declination, allowing for more time on source. However, this is complicated by two factors, the comparatively poor angular resolution of IACTs, and the significant extension of some sources such as the supernova remnant RXJ 1713.7-3946. As such, the HEGRA collaboration \cite{HEGRA} developed so called reflected-region analysis, where multiple non-overlapping OFF regions (at different distances from the ON region but of the same angular size) are used. This allows for better statistics compared to a singular OFF region and allows for measurement of a potentially non-uniform night sky background across the field. 
 
 \subsection{CTA Data Analysis Levels}
 
-The proposed CTA analysis pipeline consists of a number of data analysis levels, only some of which are relevant for deep learning analyses. These consist of:
+The proposed CTA analysis pipeline consists of a number of data analysis levels, only some of which are relevant for deep learning analyses. These consist of \cite{jasonthesis}:
 \begin{itemize}
-    \item r0 data, which is the uncalibrated raw data generated by the Cherenkov Camera
-    \item r1 data, which is online, calibrated camera data.
-    \item dl0 data, which is calibrated waveform data along with event metadata.
-    \item dl1 data, which consists of extracted charge and peak time information extracted from the calibrated waveforms.
-    \item dl2 data, which consists of extracted per-telescope Hillas parameters and other associated metadata.
-    \item dl3 data, which consists of fully processed event lists, ready for high level astronomical analysis.
+    \item r0 data, which is the uncalibrated raw data generated by the Cherenkov camera.
+    \item r1 data, which is online, calibrated camera data, calibrated using a scheme specific to the camera.
+    \item dl0 data, which is calibrated waveform data along with event metadata, and is zero suppressed to save bandwidth and storage space.
+    \item dl1 data, which consists of extracted charge and peak time information extracted from the calibrated waveforms, as well as Hillas parameters extracted from them.
+    \item dl2 data, at this stage the telescope multiplicity is dropped and the overall events are characterised (based on their Hillas parameters extracted during the dl1 stage) into 
+    \item dl3 data, at this stage the dl2 events are sorted into sets of (for example) $\gamma$-ray candidates. This also includes any relevant instrument response data needed for higher level analysis.
+    \item dl4 data, which consists of fully processed event lists, ready for high level astronomical analysis.
+    \item dl5 data, which consists of high level analysis data products produced from astronomical analysis, such as the CTA galactic plane survey.
 \end{itemize}
 
 The CTA analysis chain will therefore massively reduce the raw amount of data from the telescopes to data scales tractable with a laptop.
@@ -270,4 +316,7 @@ CTA is an instrument that is currently in the development phase, and this is tru
 
 ctapipe is a tool developed as an open-source prototype (which follows modern code practices for version control and code development) for the low-level analysis of CTA data. It is an essential tool for much of the analysis in this thesis, including elements of the VERITAS work in chapter 4, where we reverse engineered code contained within ctapipe for our purposes.
 
-gammapy and ctools are the current prototypes for high-level analysis (following similar development practice to ctapipe); of these gammapy has been selected as the high-level science tool for CTA. These allow one to generate lightcurves and spectra using IACT event lists. However none of the work in this thesis was produced using either of these tools.
+gammapy and ctools are the current prototypes for high-level analysis (following similar development practice to ctapipe); of these gammapy has been selected as the high-level science tool for CTA. These allow one to generate lightcurves and spectra using IACT event lists. 
+
+\section{Thesis Structure}
+The remainder of this thesis is structured into five chapters. In Chapter \ref{ch:2-CNNs}, we introduce deep learning methodologies, before exploring past and concurrent work on their applications for IACTs, and then introducing multiple problems with such applications that are currently unsolved. In Chapter \ref{ch:3-TimingInfo} we explore the previously unconsidered option of utilising photosensor timing information as a basis for a deep learning event classification method, utilising the advanced capability of waveform storage possible with SSTCAM. In Chapter \ref{ch:4-VERITASRealData}, we explore the difficulties in using charge-based deep learning classifiers with existing data from VERITAS, exploring in detail the complication of optimising deep learning classifiers and the complexities arising from not wishing to perform tailcut image cleaning. Chapter \ref{ch:5-CHECNSB} concerns a detailed study into the likely NSB conditions experienced by SSTCAM. Whilst NSB represents a significant challenge to deep learning event classification and reconstruction methods, the work within this chapter is largely self-contained. Finally in Chapter \ref{ch6-Conclusions} we investigate future prospects for analyses in these fields and conclude.
