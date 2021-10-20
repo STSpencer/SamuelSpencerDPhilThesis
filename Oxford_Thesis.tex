@@ -39,7 +39,7 @@
 
 % This highlights (in blue) corrections marked with (for words) \mccorrect{blah} or (for whole
 % paragraphs) \begin{mccorrection} . . . \end{mccorrection}.  This can be useful for sending a PDF of
-% your corrected thesis to your examiners for review.  Turn it off, and the blue disappears.
+% your corrected thesis to your examiners for review.  Turn https://www.overleaf.com/project/608c260a6b68867d04f5d4c2it off, and the blue disappears.
 \correctionstrue
 
 
@@ -173,7 +173,9 @@
 \begin{acknowledgements}
  	\input{text/acknowledgements}
 \end{acknowledgements}
-
+\begin{originality}
+ 	\input{text/originality}
+\end{originality}
 %%%%% ABSTRACT -- Nothing to do here except comment out if you don't want it.
 \begin{abstract}
 	\input{text/abstract}
@@ -226,7 +228,6 @@
 
 \setlength{\baselineskip}{0pt} % JEM: Single-space References
 
-{\renewcommand*\MakeUppercase[1]{#1}%
-\printbibliography[heading=bibintoc,title={\bibtitle}]}
+{\renewcommand*\MakeUppercase[1]{#1}\printbibliography[heading=bibintoc,title={\bibtitle}]}
 
 \end{document}

@@ -265,7 +265,13 @@
 	\setlength{\baselineskip}{\frontmatterbaselineskip}
 }
 {\end{alwayssingle}}
-
+\newenvironment{originality}%
+{   \begin{alwayssingle}\chapter*{Statement of Originality}
+    \thispagestyle{empty}
+	\pagestyle{empty}
+	\setlength{\baselineskip}{\frontmatterbaselineskip}
+}
+{\end{alwayssingle}}
 
 %ABSTRACT
 %

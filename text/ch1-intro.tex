@@ -3,6 +3,7 @@
 \section{Astrophysics in the Gamma-Ray Domain}
 A wide variety of astrophysical objects produce gamma-rays, including supernova remnants, activate galactic nuclei (AGN) and pulsars (to name but a few) \cite{scienceCTA}. In order to fully understand these objects, we need to capture maximal information about their emission, across the electromagnetic spectrum, as well as with multi-messenger methods (neutrinos, gravitational waves and cosmic rays).  However, performing electromagnetic observations of these sources at very high photon energies is difficult for a number of reasons \cite{jamieiact}. Firstly, these gamma rays can't be focused and as such it is necessary to use particle physics techniques to reconstruct their point of origin. Secondly, gamma rays do not penetrate the Earth's atmosphere, meaning that in order to detect gamma rays directly the instrument must be in space. Finally, gamma rays are comparatively rare (the brightest astrophysical gamma-ray sources have a flux of about 6 $\rm{photons} \ \rm{m}^{-2}\ \rm{year}^{-1}$ above 1TeV\cite{jamieiact}), meaning that in order to detect the highest energy gamma-rays one must use an instrument with a very large effective area.
 
+\subsection{The Fermi Space Telescope}
 The first two of these problems can be solved by observing in space, and the very successful Fermi mission has operated for over a decade. However, the energy range of its Large Area Telescope (LAT) survey instrument is limited to between 20MeV and 300GeV because of the comparatively small effective of the detector. As such, in order to observe higher energy photons (in the high GeV-TeV energy range) we must detect them indirectly. This can be performed using the Imaging Atmospheric Cherenkov Telescope  (IACT) method, pioneered by Jelly and Galbraith in 1953 \cite{G+J}. 
 
 \section{Current Generation Indirect Gamma-ray Detection Instruments}
@@ -29,9 +30,27 @@ The first two of these problems can be solved by observing in space, and the ver
 The Cherenkov opening angle $\theta_c$
 \begin{equation}
     \cos\theta_c=\frac{1}{n\beta}
+    \label{eq:cherenkov}
 \end{equation}
 
 where $n$ is the refractive index, $\beta$=$v/c$ where $v$ is the velocity of light in the medium and $c$ is the speed of light in a vacuum.
+\hl{Complete this section}
+The energy $dE$ emitted as a result of the particle traversing the medium per unit length $dx$ is given by the Frank-Tamm formula, derived in 1937 (and winning the authors a Nobel prize in 1958), which holds provided the velocity $v$ as a fraction of the speed of light in a vacuum $c$ is greater than $\frac{1}{n(\omega})$ (where $n(\omega)$ is the frequency dependent refractive index)
+\begin{equation}
+    \frac{d^2E}{dx\ d\omega}=\frac{q^2}{4\pi}\mu(\omega)\omega\left(1- \frac{c^2}{v^2(\omega)} \right)
+    \label{eq:FT}
+\end{equation}
+where $\mu(\omega)$ is the frequency dependent permeability, and $q$ is the charge of the particle \cite{franktamm}. The total energy emitted in Cherenkov radiation is therefore given by the corresponding integral
+\begin{equation}
+    \frac{dE}{dx}=\frac{q^2}{4\pi}\int_{v>\frac{c}{n(\omega)}}^{\infty}\mu(\omega)\omega \left(1- \frac{c^2}{v^2n^2(\omega)} \right) d \omega .
+    \label{eq:FT2}
+\end{equation}
+
+This integral is finite as $\lim_{\omega \to \infty} n(\omega)<1$ and $\lim_{\omega \to 0} n(\omega)=1$ . Assuming $\mu(v)$ is unity equation \ref{eq:FT} can also be integrated over frequency \cite{katz} to get the number of Cherenkov photons $dN_{\gamma}$ emitted per unit length
+\begin{equation}
+    \frac{dN_{\gamma}}{dx}=2\pi\alpha \left( 1- \frac{1}{\beta^2n^2} \right) \left(\frac{1}{\lambda_{min}}-\frac{1}{\lambda_{max}} \right)
+\end{equation}
+where $\alpha$ is the fine structure constant, and the $\lambda$ terms represent the minimum and maximum wavelength range of the emission. Taking this band to be 300nm-600nm and $\beta$=1 implies $\frac{dN_{\gamma}}{dx}$ is around $\mathrm{15 m^{-1}}$ at an 8km altitude in air \cite{katz}. 
 \subsection{IACT Basics}
 
 \begin{figure}[ht] 
@@ -50,24 +69,26 @@ where $n$ is the refractive index, $\beta$=$v/c$ where $v$ is the velocity of li
                 % to orient yourself when you have multiple figures,
                 % equations and tables
                 A schematic of the IACT technique, taken from \cite{jamieiact}. Three telescopes stereoscopically observe a
-                Cherenkov light pool caused by an EAS. The direction of the incident photon is reconstructed by intersecting the primary axes of 				 the elliptical images in the three cameras.
+                Cherenkov light pool caused by an EAS. The direction of the incident photon is reconstructed by intersecting the primary axes of 				 the elliptical images in the three cameras. On the right, an illustration that the light from the lowest altitude part of the shower is the first to arrive on the ground.
         }
 \end{figure}
 When a photon with an energy of above around 50GeV encounters the Earth's atmosphere, it undergoes pair production in the electric field of the nucleus of an atmospheric molecule $X$
 \begin{equation}
 \mathrm{\gamma}+\mathrm{X} \rightarrow \mathrm{X}+\mathrm{e^+}+ \mathrm{e^-}.
 \end{equation}
-The resulting electron and positron have very high kinetic energy, and so travel very close to the speed of light in a vacuum and faster than the speed of light in air. As a result, Cherenkov radiation is emitted by the molecules in the vicinity of the particle.
+This occurs on average after the $\gamma$-ray travels through one radiation length's worth of atmosphere, typically at around a 20km altitude \cite{weekesgamma}. The resulting electron and positron have very high kinetic energy, and so travel very close to the speed of light in a vacuum and faster than the speed of light in air. As a result, Cherenkov radiation is emitted by the molecules in the vicinity of the particle.
 %add more depth here
-The generated particles continue to interact, emitting photons via Brehmsstrahlung radiation and creating a particle cascade or Extensive Air Shower (EAS). The Cherenkov light from this EAS can be observed with an optical frequency telescope on the ground at night provided it is equipped with an extremely fast (ns timescale camera) camera. In order to reconstruct the energy and direction of the incident gamma-ray optimally, data from an array of such telescopes is typically combined stereoscopically.
+The generated particles continue to interact, emitting photons via Brehmsstrahlung radiation, and creating a particle cascade or Extensive Air Shower (EAS). This cascade continues down into the atmosphere until the radiation and ionisation losses become equal, which is also the point at which the maximum number of particles ($N_{Max}$) are present in the shower as a function of atmospheric mass traversed $X_{Max}$(in $\mathrm{g\ cm^{-2}}$). This point is known as the shower maximum. The altitude at which this occurs is referred to as $h_{Max}$, after which point the energy losses dominate and the number of produced particles significantly reduces. For an incident $\gamma$-ray of 10 TeV energy, $X_{Max}\approx 431 \mathrm{\ g\ cm^{-2}}$, $h_{Max}=6.8\ \mathrm{km}$ and $N_{Max}=1.0 \times 10^4$ \cite{weekesgamma}. Some muons from the shower interaction can however survive to reach the ground, at around a rate of 1 muon a $\mathrm{cm^{-2}}$ minute$^{-1}$. The Cherenkov light produced from this EAS forms a pool on the ground of radius $\sim$120 m \cite{weekesgamma}, and this can be observed with an optical frequency telescope on the ground at night provided it is equipped with an extremely fast (ns timescale) camera, as the Cherenkov light flash from an EAS is of the order of a few ns. In order to reconstruct the energy and direction of the incident $\gamma$-ray optimally, data from an array of such telescopes is typically combined stereoscopically, a technique pioneered by the \textit{High-Energy-Gamma-Ray Astronomy} (HEGRA) instrument in the 1990s \cite{HEGRA}. This use of stereoscopy improves backround rejection power as the chances of directly imaging a muon ring originating from a proton shower are higher, and with multiple images the determination of shower width is more accurate.  The optimal spacing for these telescopes is of the same order as the size of the light pool on the ground \cite{weekesgamma}.
 %Need refs for this bit
-
-\subsection{H.E.S.S.}
+\section{Current Generation Instruments}
 \subsection{VERITAS}
-VERITAS consists of 4 10 meter parabolic, single mirror IACTs at the Fred Lawrence Whipple Observatory in Arizona (the original VERITAS design intended 8 IACTs). It is designed to give optimal sensitivity in 100GeV to 10TeV energy band.
-
+\textit{Very Energetic Radiation Imaging Telescope Array System} (VERITAS) consists of 4 12 meter parabolic, single mirror IACTs at the Fred Lawrence Whipple Observatory in Arizona (the original VERITAS design intended 8 IACTs). Construction of VERITAS began in 2003 and was completed in 2007. It is designed to give optimal sensitivity in 100GeV to 10TeV energy band. Recent work performed by VERITAS includes the discovery of gamma-ray emission from the Blazar TXS 0506+056, coincident with a neutrino detection from IceCube \cite{TXS}, and the detection of TeV gamma-rays from the Blazar PKS 1441+25, indicating the transparency of the universe to photons of such energies \cite{escape}. In chapter \ref{ch:4-VERITASRealData}, we use real data from VERITAS to test deep learning based event classification as a technique intended for use by CTA.
 
 \subsection{MAGIC}
+\textit{Major Atmospheric Gamma Imaging Cherenkov Telescopes} (MAGIC) consists of two 17m IACTs on La Palma, designed to detect $\gamma$-rays with energies between 25GeV and 30 TeV. MAGIC's cameras are unusual as they consist of two separate types of conventional photomultiplier, 386 hexagonal pixels in the centre surrounded by 180 larger pixels at the edge. Primarily constructed to hunt for Gamma-Ray Bursts (GRBs) from the ground, a goal it achieved when it detected TeV $\gamma$-rays from GRB 190114C in early 2019 \cite{magicGRB}.
+\subsection{H.E.S.S.}
+\textit{High Energy Stereoscopic System} (H.E.S.S.) is an IACT array in the Khomas Highlands of Namibia. The only current generation instrument to consist of multiple classes of IACT, 4 with a $\sim$ 12 meter diameter mirror and a fifth with a 28m diameter mirror, giving it an operational energy range of 30GeV to 100TeV. Construction of the four original 12m instruments was completed in 2003, with the larger telescope completed in 2012. Notable recent achievements of H.E.S.S. include resolving the extension of the Crab Nebula \cite{crabextension} and the jet of Centaurus A \cite{cena}.
+
 \subsection{FACT}
 The \textit{First G-APD Cherenkov Telescope} (FACT) is an autonomous upgrade of a former HEGRA Cherenkov telescope, notable for being the first instrument to attempt the use of Silicon Photomultipliers in Cherenkov astronomy. Given it is a single IACT and not an array, however, its sensitivity is limited. As such it largely operates as a blazar monitoring instrument, such that other instruments can be notified in the event of a flare. 
 
@@ -75,10 +96,48 @@ FACT arguably has one of the most advanced analysis chains of current IACTs, whi
 
 \subsection{HAWC, Tibet AS-$\gamma$ and LHASSO}
 
-The IACT technique is not the only means of indirect $\gamma$-ray detection from the ground. At sufficiently high altitude, one can use Water Cherenkov detectors to directly observe the electrons from an incident shower, and then use arrival time information as a background rejection method. This is the key principle underlying the successful \textit{High Altitude Water Cherenkov} (HAWC) observatory in Mexico, as well the principle behind the Chinese Tibet AS-$\gamma$ and \textit{Large High Altitude Air Shower Observatory} (LHASSO) experiments (the under construction LHASSO detector will also have small IACTs on site). These complement IACTs with their main advantage of being that these are survey instruments with a wide field of view, higher operational energy range and nearly $100\%$ duty cycle, but comparatively poor angular resolution and background rejection. 
+The IACT technique is not the only means of indirect $\gamma$-ray detection from the ground. At sufficiently high altitude, one can use Water Cherenkov detectors to directly observe the electrons from an incident shower, and then use arrival time information as a background rejection method. This is the key principle underlying the successful \textit{High Altitude Water Cherenkov} (HAWC) observatory in Mexico, as well the principle behind the Chinese Tibet AS-$\gamma$ and \textit{Large High Altitude Air Shower Observatory} (LHASSO) experiments (the currently under construction LHASSO detector will also have small IACTs on site). These complement IACTs with their main advantage of being that these are survey instruments with a wide field of view, higher operational energy range and nearly $100\%$ duty cycle, but comparatively poor angular resolution and background rejection. 
 
 \section{The Cherenkov Telescope Array and Associated Instruments}
-The Cherenkov Telescope Array (CTA) is an ambitious project to build a next-generation VHE $\gamma$-ray facility, which aims to improve on the sensitivity of the current generation instruments by roughly an order of magnitude \cite{scienceCTA}. The CTA consortium, involved in directing CTA Observatory science goals and array design, consists of over 1400 scientists from 31 countries around the globe. Given the large energy range (20 GeV to 300 TeV) that CTA will operate  over \cite{scienceCTA}, three classes of IACT are required. These are designated as the Small-, Medium- and Large-Sized Telescopes (SSTs, MSTs and LSTs). The 23-meter diameter LSTs are designed for high sensitivity observations of $\gamma$-rays over the 20 GeV-150 GeV energy range, increasing the overlap in sensitivity with space based missions such as the Fermi $\gamma$-ray Space Telescope \cite{Fermi}. The SSTs will be the smallest (approximately 4 m diameter) but most numerous telescopes, and will be spread out over a large ($\sim$4 km$^2$) area in order to maximise CTA's effective area for $\gamma$-ray energies over 5 TeV. The MSTs will provide unprecedented sensitivity to cosmic $\gamma$-ray fluxes in the intermediate energy range. The baseline design of CTA consists of 99 telescopes (4 LSTs, 25 MSTs, 70 SSTs) placed on a southern site at Cerro Paranal in Chile, whereas a smaller array of 19 telescopes (4 LSTs, 15 MSTs, and no SSTs) will be placed on a northern site on Spanish Canary Island of La Palma. In this way, the CTA Observatory will cover the whole sky \cite{scienceCTA}. However, at the time of writing, the current cost book allows for no LSTs and only 15MSTs and 40 SSTs on the Southern Site. 
+The Cherenkov Telescope Array (CTA) is an ambitious project to build a next-generation VHE $\gamma$-ray facility, which aims to improve on the sensitivity of the current generation instruments by roughly an order of magnitude \cite{scienceCTA}. The CTA consortium, involved in directing CTA Observatory science goals and array design, consists of over 1400 scientists from 31 countries around the globe. Given the large energy range (20 GeV to 300 TeV) that CTA will operate  over \cite{scienceCTA}, three classes of IACT are required. These are designated as the Small-, Medium- and Large-Sized Telescopes (SSTs, MSTs and LSTs). The 23-meter diameter LSTs are designed for high sensitivity observations of $\gamma$-rays over the 20 GeV-150 GeV energy range, increasing the overlap in sensitivity with space based missions such as the Fermi $\gamma$-ray Space Telescope \cite{Fermi}. The SSTs will be the smallest (approximately 4 m diameter) but most numerous telescopes, and will be spread out over a large ($\sim$4 km$^2$) area in order to maximise CTA's effective area for $\gamma$-ray energies over 5 TeV. The MSTs will provide unprecedented sensitivity to cosmic $\gamma$-ray fluxes in the intermediate energy range. The baseline (omega configuration) design of CTA consists of 99 telescopes (4 LSTs, 25 MSTs, 70 SSTs) placed on a southern site at Cerro Paranal in Chile, whereas a smaller array of 19 telescopes (4 LSTs, 15 MSTs, and no SSTs) will be placed on a northern site on Spanish Canary Island of La Palma. By having both a northern and southern site, the CTA Observatory will cover the whole sky \cite{scienceCTA}. However, as of writing this thesis, the current construction plan for CTA is to first build a so called alpha configuration array consisting of 4 LSTs and 9 MSTs in the northern site, and 14 MSTs and 37 SSTs in the southern array.
+\begin{figure}[ht] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=0.7\columnwidth]{figures/southlayout.png}
+        % note that in above figure file name, "sr_setup",
+        % the file extension is missing. LaTeX is smart enough to find
+        % apropriate one (i.e. pdf, png, etc.)
+        % You can add this extention yourself as it seen below
+        % both notations are correct but above has more flexibility
+        %\includegraphics[width=1.0\columnwidth]{sr_setup.pdf}
+        \caption{
+                \label{fig:southlayout} % spaces are big no-no withing labels
+                % things like fig: are optional in the label but it helps
+                % to orient yourself when you have multiple figures,
+                % equations and tables
+                The CTA-South alpha array configuration, taken from \cite{zencta}.
+        }
+\end{figure}
+\subsection{CHEC}
+\begin{figure}[ht] 
+        % read manual to see what [ht] means and for other possible options
+        \centering \includegraphics[width=\columnwidth]{figures/cam.png}
+        % note that in above figure file name, "sr_setup",
+        % the file extension is missing. LaTeX is smart enough to find
+        % apropriate one (i.e. pdf, png, etc.)
+        % You can add this extention yourself as it seen below
+        % both notations are correct but above has more flexibility
+        %\includegraphics[width=1.0\columnwidth]{sr_setup.pdf}
+        \caption{
+                \label{fig:cam} % spaces are big no-no withing labels
+                % things like fig: are optional in the label but it helps
+                % to orient yourself when you have multiple figures,
+                % equations and tables
+                The CHEC-S CAD model with key elements highlighted, taken from \cite{rwhite}.
+        }
+\end{figure}
+The UK's main material contribution to CTA construction is planned to be construction of a variant of the Compact High Energy Camera (CHEC), which is designed to work with SST structures that have a dual-mirror (Swartzchild-Couder) optical design. CHEC was designed to be compatible with both the GCT and ASTRI optical structures.  Two operational CHEC prototypes have already been built. The first, CHEC-M, has as its light detectors 32 Multi-Anode Photomultipliers (MAPMs)\cite{tomthesis}. These consist of a block of 8x8 pixels, the signals from which are digitised at a rate of $1\mathrm{GSa}/\mathrm{s}$ \cite{tomthesis} by front end electronics based upon the custom TARGET application-specific integrated circuit (ASIC) \cite{checmpaper}. When it is triggered by two or more four pixel blocks exceeding a discriminator threshold, the data is read out of the camera over a 96ns window containing 96 photoelectron samples. A refined prototype, CHEC-S, is currently undergoing testing at the Max Planck Institute for Nuclear Physics in Heidelberg. CHEC-S contains a refinement of the TARGET-based electronics of its predecessor, but replaces the MAPMs with Silicon Based Photomultipliers (SiPMs). These have the advantage of being more durable than MAPMs, but are also cheaper and can operate in conditions with a higher night sky background (NSB). CHEC is designed to work with SST structures that have a dual-mirror (Swartzschild-Couder) optical design. This design allows for a compact camera (approximately 0.4 m diameter) with small scale photosensors (6/7 mm, corresponding to roughly a third of the plate scale of a comparable single mirror design) and a wide field of view ($\sim$0.2 degrees per pixel). Two operational CHEC prototypes have already been built, the most recent of which (CHEC-S) is currently undergoing testing at the Max Planck Institute for Nuclear Physics in Heidelberg, and has recently been used on an observing campaign on the ASTRI prototype. Further details regarding the science performance of the SST sub-array and the complete CTA instrument can be found in Maier et. al \cite{gernotCTA} and Hassan et. al \cite{tarekCTA}.
+
+Both CHEC cameras and the upcoming SSTCAM have inbuilt self-calibration LED flasher systems, designed to flat-field the camera. The flashers on the CHEC prototypes were attached to the camera corners and reflected off the secondary mirror, for the final SSTCAM design the flasher will most likely be situated behind the secondary mirror and shine through. 
 
 \subsection{GCT, ASTRI and the SST Harmonization Process}
 
@@ -102,27 +161,16 @@ There are two SST dual-mirror prototype designs that CHEC cameras can be attache
         }
 \end{figure}
 
-\subsection{CHEC}
-\begin{figure}[ht] 
-        % read manual to see what [ht] means and for other possible options
-        \centering \includegraphics[width=\columnwidth]{figures/cam.png}
-        % note that in above figure file name, "sr_setup",
-        % the file extension is missing. LaTeX is smart enough to find
-        % apropriate one (i.e. pdf, png, etc.)
-        % You can add this extention yourself as it seen below
-        % both notations are correct but above has more flexibility
-        %\includegraphics[width=1.0\columnwidth]{sr_setup.pdf}
-        \caption{
-                \label{fig:cam} % spaces are big no-no withing labels
-                % things like fig: are optional in the label but it helps
-                % to orient yourself when you have multiple figures,
-                % equations and tables
-                The CHEC-S CAD model with key elements highlighted, taken from \cite{rwhite}.
-        }
-\end{figure}
-The UK's main material contribution to CTA construction is planned to be a variant of the Compact High Energy Camera (CHEC), which is designed to work with SST structures that have a dual-mirror (Swartzchild-Couder) optical design. CHEC was designed to be compatible with both the GCT and ASTRI optical structures.  Two operational CHEC prototypes have already been built. The first, CHEC-M, has as its light detectors 32 Multi-Anode Photomultipliers (MAPMs)\cite{tomthesis}. These consist of a block of 8x8 pixels, the signals from which are digitised at a rate of $1\mathrm{GSa}/\mathrm{s}$ \cite{tomthesis} by front end electronics based upon the custom TARGET application-specific integrated circuit (ASIC) \cite{checmpaper}. When it is triggered by two or more four pixel blocks exceeding a discriminator threshold, the data is read out of the camera over a 96ns window containing 96 photoelectron samples. A refined prototype, CHEC-S, is currently undergoing testing at the Max Planck Institute for Nuclear Physics in Heidelberg. CHEC-S contains a refinement of the TARGET-based electronics of its predecessor, but replaces the MAPMs with Silicon Based Photomultipliers (SiPMs). These have the advantage of being more durable than MAPMs, but are also cheaper and can operate in conditions with a higher night sky background (NSB). CHEC is designed to work with SST structures that have a dual-mirror (Swartzschild-Couder) optical design. This design allows for a compact camera (approximately 0.4 m diameter) with small scale photosensors (6/7 mm, corresponding to roughly a third of the plate scale of a comparable single mirror design) and a wide field of view ($\sim$0.2 degrees per pixel). Two operational CHEC prototypes have already been built, the most recent of which (CHEC-S) is currently undergoing testing at the Max Planck Institute for Nuclear Physics in Heidelberg, and has recently been used on an observing campaign on the ASTRI prototype. Further details regarding the science performance of the SST sub-array and the complete CTA instrument can be found in Maier et. al \cite{gernotCTA} and Hassan et. al \cite{tarekCTA}.
+\section{Methods and Environments of Astrophysical $\gamma$-ray Emission}
+\subsection{Inverse Compton Scattering}
 
-Both CHEC cameras and the upcoming SSTCAM have inbuilt self-calibration LED flasher systems, designed to flat-field the camera. The flashers on the CHEC prototypes were attached to the camera corners and reflected off the secondary mirror, for the final SSTCAM design the flasher will most likely be situated behind the secondary mirror and shine through. 
+Inverse compton scattering describes 
+
+Synchrotron self-compton off both synchrotron and CMB photon fields.
+
+\subsection{Hadronic Emission}
+As seen in an earlier section, the collision of two protons at very high energy can yield high energy $\gamma$-rays.
+
 
 \section{The Key Science Projects of CTA}
 The CTA observing time not allocated to open observations will be dedicated to a number of Key Science Projects (KSPs). In this section we briefly explore the science potential for each of these missions.
@@ -149,7 +197,19 @@ An AGN KSP is also envisaged to perform long term monitoring of a select set of 
 \section{Types of IACT Backgrounds}
 \subsection{Hadronic Air Showers}
 
-In order to perform all of the scientific investigations explored in chapter 2 along with the guest observation programme, we need to be able to distinguish astrophysical gamma-ray signals from background reliably. Unfortunately, not all EAS are caused by gamma-ray photons. For most energies, EAS caused by incident charged hadrons (most commonly protons) outnumber those caused by photons by a factor of roughly 10,000 \cite{Benbow}. These provide a significant background to IACTs, and are the largest constraint on their sensitivity. However, because the quarks contained within protons experience the strong nuclear force, the typical interactions they undergo on entering the atmosphere are different to photons. A typical interaction scheme \cite{EAS} is
+In order to perform all of the scientific investigations explored in Chapters \ref{ch:3-TimingInfo} and \ref{ch:4-VERITASRealData}, along with the guest observation program, we need to be able to distinguish astrophysical gamma-ray signals from background reliably. Unfortunately, not all EAS are caused by gamma-ray photons. For most energies, EAS caused by incident charged hadrons (most commonly protons) outnumber those caused by photons by a factor of roughly 10,000 \cite{Benbow}. These provide a significant background to IACTs, and are the largest constraint on their sensitivity.
+
+\begin{figure}
+\begin{center}  
+
+\includegraphics[width=\columnwidth]{figures/pdgcr.png}
+ 
+\caption{The all particle cosmic ray spectrum, taken from \cite{pdg}. Whilst mainly protons, this spectrum includes both cosmic ray electrons and heavier element cosmic rays. The spectrum is a power law with index -2.7 up to around $3 \times 10^6$ GeV, where it steepens to an index of -3.1, a transition feature known as 'the knee'. It then flattens back to an index of -2.7 at $4 \times 10^9$ GeV (a feature known as 'the ankle'. The lower energy cosmic rays below the knee are believed to be galactic in origin, most likely a result of acceleration in supernova remnants. The higher energy cosmic rays above the knee are believed to be the result of cosmic ray acceleration in extragalactic sources such as Active Galactic Nuclei (AGN). The so-called GZK cutoff is theorised to exist at energies around 50 EeV \cite{gzk}, the limit at which a cosmic ray could propagate from another galaxy without interacting with the CMB. For comparison, the LHC operates at a centre of mass energy of 14TeV for proton-proton collisions, corresponding to an initial EAS proton energy of $1\times 10^{17}$eV.}
+\label{fig:crspec}
+\end{center}
+\end{figure}
+
+However, because the quarks contained within protons experience the strong nuclear force, the typical interactions they undergo on entering the atmosphere are different to photons. A typical interaction scheme \cite{EAS} is
 \begin{gather*}
 \mathrm{p}+\mathrm{p}\rightarrow \mathrm{N}+\mathrm{N}+n_1 \mathrm{\pi^{\pm}}+n_2\mathrm{\pi^0} \\
 \mathrm{\pi^0} \rightarrow \mathrm{2\gamma} \\
@@ -165,7 +225,7 @@ where $N$ represents the resulting fragmented hadrons which are produced along w
 
 \includegraphics[width=0.5\columnwidth,trim=4 4 30 4,clip]{figures/showers.png}
  
-\caption{XZ plots of CORSIKA simulations of particle tracks for 100 GeV photon (left) and proton (right) events. Note the wider, less concentrated proton shower. \cite{corskplot}}
+\caption{XZ plots of CORSIKA simulations of particle tracks for 100 GeV photon (left) and proton (right) events. Note the wider, less concentrated proton shower (taken from \cite{corskplot}).}
 \label{fig:image2}
 \end{center}
 \end{figure}
@@ -198,7 +258,7 @@ Electronic noise present in IACT camera data needs to be removed. For this purpo
 
 \subsection{Charge Integration}
 
-Charge integration is the process of taking a calibrated PMT trace and extracting the number of photoelectrons. Various schemes exist for performing this operation, CHEC/SSTCAM relies on a cross-correlation template fitting model developed by J. Watson.
+Charge integration is the process of taking a calibrated PMT trace and extracting the number of photoelectrons. Various schemes exist for performing this operation, CHEC/SSTCAM relies on a cross-correlation template fitting model developed by J. Watson \cite{jasonthesis}.
 
 \subsection{Tailcut Cleaning}
 
@@ -306,7 +366,7 @@ The most widely used alternative to Hillas-type analysis is using the Image Pixe
 \begin{equation}
 P(s_i|\mu,\sigma_p,\sigma_y)=\sum_n \frac{\mu^n e^{-\mu}}{n!\sqrt{2\pi (\sigma_p^2+n\sigma_{\gamma}^2)}} \exp \left(-\frac{(s-n)^2}{2(\sigma_p^2 + n \sigma_{\gamma}^2)} \right)
 \end{equation}
-$n$ is the photoelectron number, $\sigma_p$ is the pedestal width (the width of the charge distribution under pure noise), $\sigma_{\gamma}$ represents the photomultiplier resolution, $s$ is the number of signal photoelectrons detected and $\mu$ is the predicted number of photoelectrons from the template. In Practice, ImPACT is only used for directional and energy reconstruction in H.E.S.S. due to concerns about its sensitivity to NSB photons (a problem similar to the real data problem experienced by CNN-type methods). The H.E.S.S. ImPACT chain uses a BDT based on Hillas Parameters for gamma/hadron separation.
+$n$ is the photoelectron number, $\sigma_p$ is the pedestal width (the width of the charge distribution under pure noise), $\sigma_{\gamma}$ represents the photomultiplier resolution, $s$ is the number of signal photoelectrons detected and $\mu$ is the predicted number of photoelectrons from the template. In Practice, ImPACT is only used for directional and energy reconstruction in H.E.S.S. due to concerns about its sensitivity to NSB photons (a problem similar to the real data problem experienced by Convolutional Neural Network (CNN)-type methods). The H.E.S.S. ImPACT chain uses a BDT based on Hillas Parameters for gamma/hadron separation.
 
 The difficulty in using ImPACT for CTA is the requirement of having a sufficient number of template simulations to cope with every possible type of event with a given energy and incident direction for so many telescopes, and the computational cost of searching through those simulations to find the optimal event parameters.
 
