@@ -79,6 +79,12 @@ When a photon with an energy of above around 50GeV encounters the Earth's atmosp
 This occurs on average after the $\gamma$-ray travels through one radiation length's worth of atmosphere, typically at around a 20km altitude \cite{weekesgamma}. The resulting electron and positron have very high kinetic energy, and so travel very close to the speed of light in a vacuum and faster than the speed of light in air. As a result, Cherenkov radiation is emitted by the molecules in the vicinity of the particle.
 %add more depth here
 The generated particles continue to interact, emitting photons via Brehmsstrahlung radiation, and creating a particle cascade or Extensive Air Shower (EAS). This cascade continues down into the atmosphere until the radiation and ionisation losses become equal, which is also the point at which the maximum number of particles ($N_{Max}$) are present in the shower as a function of atmospheric mass traversed $X_{Max}$(in $\mathrm{g\ cm^{-2}}$). This point is known as the shower maximum. The altitude at which this occurs is referred to as $h_{Max}$, after which point the energy losses dominate and the number of produced particles significantly reduces. For an incident $\gamma$-ray of 10 TeV energy, $X_{Max}\approx 431 \mathrm{\ g\ cm^{-2}}$, $h_{Max}=6.8\ \mathrm{km}$ and $N_{Max}=1.0 \times 10^4$ \cite{weekesgamma}. Some muons from the shower interaction can however survive to reach the ground, at around a rate of 1 muon a $\mathrm{cm^{-2}}$ minute$^{-1}$. The Cherenkov light produced from this EAS forms a pool on the ground of radius $\sim$120 m \cite{weekesgamma}, and this can be observed with an optical frequency telescope on the ground at night provided it is equipped with an extremely fast (ns timescale) camera, as the Cherenkov light flash from an EAS is of the order of a few ns. In order to reconstruct the energy and direction of the incident $\gamma$-ray optimally, data from an array of such telescopes is typically combined stereoscopically, a technique pioneered by the \textit{High-Energy-Gamma-Ray Astronomy} (HEGRA) instrument in the 1990s \cite{HEGRA}. This use of stereoscopy improves backround rejection power as the chances of directly imaging a muon ring originating from a proton shower are higher, and with multiple images the determination of shower width is more accurate.  The optimal spacing for these telescopes is of the same order as the size of the light pool on the ground \cite{weekesgamma}.
+
+Given that the only interactions possible in an electomagnetic air shower are pair production and $\gamma$-ray brehmstrahlung, it is possible to construct a simple model of their evolution (the Heitler model) \cite{heitler}. Given that the radiation length of an electron in the atmosphere is known, $X_0=\mathrm{36.7\ g\ cm^{-2}}$, the typical length over which a new pair production will occur is $N_0=X_0 \ln 2$, therefore after $n$ interactions the atmospheric grammage traversed is $x=nX_0 \ln 2$, and the number of surviving particles is $N=2^n=\exp \left( \frac{x}{X_0}\right)$. Assuming the particle energies are uniformly distributed, the energy per particle $E=E_0/N$ (where $E_0$ is the initial energy of the originally incident particle. Given that the shower maximum occurs when $E=E_c^e=\mathrm{85 MeV}$, the number of particles at shower maximum is given by 
+\begin{equation}
+    N_{Max}=2^{n_c}=\frac{E_0}{E_c^e}
+\end{equation}
+where $n_c=\frac{\ln (\frac{E_0}{E_e^c})}{\ln 2}$.
 %Need refs for this bit
 \section{Current Generation Instruments}
 \subsection{VERITAS}
@@ -164,13 +170,29 @@ There are two SST dual-mirror prototype designs that CHEC cameras can be attache
 \section{Methods and Environments of Astrophysical $\gamma$-ray Emission}
 \subsection{Inverse Compton Scattering}
 
-Inverse compton scattering describes 
+Inverse Compton scattering describes the process by which low energy photons are scattered by ultra-relativistic electrons, significantly increasing the kinetic energy of the photons. The photon fields accelerated by the electrons vary; they can be a population of photons produced through synchrotron emission that are then hit by the high energy electrons that emitted them (so-called synchrotron self-Compton emission), can be the result of starlight, or originate from the cosmic microwave background. In the rest frame of the electron, the ratio of final photon energy over initial energy is given by
+\begin{equation}
+    \frac{E_f}{E_i}=\gamma (1+\beta \cos(\theta))
+\end{equation}
+where $\gamma$is the Lorentz factor of the electrons and $\theta$ is the deflection angle. Transferring to the observer frame this works out at around $\frac{E_f}{E_i}\sim \gamma^2$. This results in the spectral emissivity from inverse Compton scattering of an isotropic photon field of single photon frequency $v_0$ by a power law distribution of electrons being given by 
+\begin{equation}
+    I(v)dv=\frac{3\sigma_TcvN(v_0)}{16\gamma^4v_0^2}\left(2c\ln\left(\frac{v}{4\gamma^2v_0}\right)+v+4\gamma^2v_0-\frac{v^2}{2\gamma^2v_0}\right)dv
+\end{equation}
+where $N(v_0)$ is the number density of photons, $\sigma_T$ is the Thompson cross section, $v$ is the frequency of the $\gamma$-rays \cite{blumenthal}.
 
-Synchrotron self-compton off both synchrotron and CMB photon fields.
 
 \subsection{Hadronic Emission}
-As seen in an earlier section, the collision of two protons at very high energy can yield high energy $\gamma$-rays.
+The collision of two sufficiently high energy protons can create pions through strong interactions.  A typical interaction scheme \cite{EAS} is
+\begin{gather*}
+\mathrm{p}+\mathrm{p}\rightarrow \mathrm{N}+\mathrm{N}+n_1 \mathrm{\pi^{\pm}}+n_2\mathrm{\pi^0} \\
+\mathrm{\pi^0} \rightarrow \mathrm{2\gamma} \\
+\mathrm{\mathrm{\pi^{\pm}}} \rightarrow \mathrm{\mu^{\pm}}+\mathrm{\overset{(-)}{\nu_{\mu}}}\\
+\mathrm{\mu^{\pm}} \rightarrow \mathrm{e^{\pm}}+\mathrm{\overset{(-)}{\nu_{\mu}}}+\mathrm{\overset{(-)}{\nu_{e}}}
+\end{gather*}
+where $N$ represents the resulting fragmented hadrons which are produced along with $n_1$ charged pions and $n_2$ neutral pions. The charged pions have a lifetime of which have a short lifetime of only 26 ns, but the neutral pions' lifetime is much shorter at $5 \times 10^{-17} \mathrm{s}$ because it decays due to the electromagnetic force. Hadronic emission processes are challenging to discriminate from inverse Compton scattering in some sources, particularly supernova remnants \cite{rxjcta}. The recent detection of an astrophysical neutrino (IceCube-170922A) by IceCube that was coincident with a $\gamma$-ray flare of the blazar TXS 0506+056 suggests that some $\gamma$-rays from blazars are produced by hadronic processes, likely close to the associated supermassive black hole \cite{TXS}. As we'll see later in this chapter, these fundamental processes occur in the same way in EAS, when a high energy cosmic ray hits the Earth's atmosphere.
 
+\subsection{Known Astrophysical $\gamma$-ray Sources}
+$\gamma$-rays are known to be produced by hadronic and inverse compton processes in a variety of environments. These include supernova remnants, Active Galactic Nuclei (AGN, typically blazars where the jet of the AGN points towards Earth), pulsar wind nebulae, $gamma$-ray binaries \cite{scienceCTA} and most recently Novae [H.E.S.S., in prep]. Gamma-ray bursts have also recently been observed by IACTs on the ground for the first time \cite{magicGRB}; these can originate from neutron star collisions or supernovae. There is also both galactic and extragalactic diffuse $\gamma$-ray emission seen by IACTs. In the galactic case it is believed the majority of the emission results from hadronic emission due to collisions of cosmic rays with galactic gas \cite{extragamma}. The extragalactic case is less well understood \cite{extragamma}, with the majority of emission likely due to unresolved blazars, radio galaxies and star-forming galaxies, but some additional components may be due to dark matter annihilation or cosmic ray interactions.
 
 \section{The Key Science Projects of CTA}
 The CTA observing time not allocated to open observations will be dedicated to a number of Key Science Projects (KSPs). In this section we briefly explore the science potential for each of these missions.
@@ -185,7 +207,7 @@ Around 1800 total hours of observing time will be spent performing observations 
 It is anticipated that the maps generated by the GPS will be periodically made public, in order to maximize its multi-wavelength science potential.
 Additionally, the PeVatron KSP aims to perform dedicated, deep observations of known gamma-ray sources with particularly hard spectra (such as RX J1713.7-3946), and search for diffuse gamma-ray emission around known Supernova Remnants in an attempt to understand the origins and acceleration methods of cosmic rays \cite{scienceCTA}.
 
-\subsection{The Large Magellanic Cloud Survey and the Star Forming Systems KSP} Around 600 hours of CTA observation time will be spent on observing the Large Magellanic Cloud (LMC). In particular, the LMC is interesting at TeV energies due to its high rate of star formation. %; the LMC produces about one tenth of the number of stars as the Milky Way, but has only 2\% of the Milky Way's volume \cite{scienceCTA}.
+\subsection{The Large Magellanic Cloud Survey and the Star Forming Systems KSP} Around 600 hours of CTA observation time will be spent on observing the Large Magellanic Cloud (LMC). In particular, the LMC is interesting at TeV energies due to its high rate of star formation; the LMC produces about one tenth of the number of stars as the Milky Way, but has only 2\% of the Milky Way's volume \cite{scienceCTA}.
 As such, it contains a disproportionate number of supernova remnants (such as SN1987A) and pulsar wind nebulae.  These can be observed more easily in the LMC than in the Milky Way due to the absence of source confusion, interstellar absorption and line of sight crowding at the LMC's high galactic latitude \cite{scienceCTA}. Other observations of galactic star forming regions (for example Westerlund 1) are also planned as part of the star forming systems KSP, in order to investigate the link between star formation and particle acceleration.
 
 \subsection{The Extra-Galactic Survey and the AGN KSP} One of the largest time allocations, the extra-galactic survey will cover 25\% of the sky down to 6 mCrab sensitivity \cite{scienceCTA}. It will aim to achieve an unbiased census of gamma-ray AGN, observe fast-flaring sources and gamma-ray busts serendipitously, and measure the anisotropies in the electron cosmic ray spectrum. Key to this is CTA's ability to operate in a divergent pointing mode, where not all telescopes in the array are pointing at the same patch on the sky. 
@@ -209,14 +231,7 @@ In order to perform all of the scientific investigations explored in Chapters \r
 \end{center}
 \end{figure}
 
-However, because the quarks contained within protons experience the strong nuclear force, the typical interactions they undergo on entering the atmosphere are different to photons. A typical interaction scheme \cite{EAS} is
-\begin{gather*}
-\mathrm{p}+\mathrm{p}\rightarrow \mathrm{N}+\mathrm{N}+n_1 \mathrm{\pi^{\pm}}+n_2\mathrm{\pi^0} \\
-\mathrm{\pi^0} \rightarrow \mathrm{2\gamma} \\
-\mathrm{\mathrm{\pi^{\pm}}} \rightarrow \mathrm{\mu^{\pm}}+\mathrm{\overset{(-)}{\nu_{\mu}}}\\
-\mathrm{\mu^{\pm}} \rightarrow \mathrm{e^{\pm}}+\mathrm{\overset{(-)}{\nu_{\mu}}}+\mathrm{\overset{(-)}{\nu_{e}}}
-\end{gather*}
-where $N$ represents the resulting fragmented hadrons which are produced along with $n_1$ charged pions and $n_2$ neutral pions. The resultant gamma rays can themselves undergo pair production creating electromagnetic sub-showers of the hadronic shower core. The charged products are typically highly relativistic and thus produce detectable Cherenkov light. The muons also undergo a significant number of inelastic scattering interactions, carrying a larger fraction of the total transverse momentum away from the shower core and resulting in a wider overall EAS compared to a gamma-ray induced shower \cite{tomthesis}.  
+However, because the quarks contained within protons experience the strong nuclear force, the typical interactions they undergo on entering the atmosphere are different to photons, the typical products of these interactions are photons, muons and electrons. The rest frame lifetime of the muons is only 2.197 $\mu$s \cite{pdg}, however because the muons produced in these interactions are highly relativistic, the muons can survive to ground level as a results of time dilation effects, but some decay to electrons via the weak nuclear force. The muons also undergo a significant number of inelastic scattering interactions, carrying a larger fraction of the total transverse momentum away from the shower core and resulting in a wider overall EAS compared to a gamma-ray induced shower \cite{tomthesis}.  The resultant $\gamma$-rays from $\pi_0$ decay (as seen earlier in this chapter) can themselves undergo pair production creating electromagnetic sub-showers of the hadronic shower core. The charged products are typically highly relativistic and thus produce detectable Cherenkov light.  Whilst the interaction scheme for hadronic air showers is more complex than for $\gamma$-ray or electron induced ones, it is still possible to construct semi-analytic models of their evolution. The most notable of these is the Heitler-Matthew model, details regarding this can be found in \cite{heitler}.
 
 %Not all background for Cherenkov telescopes can be attributed to Cherenkov light, atomic oxygen, hydroxide and sodium airglow emission lines in the atmosphere can contribute significantly at sufficiently long wavelength \cite{pmtubes}. However, we neglect this effect in this report as it can be negated by operating at short wavelengths and operating from a dark enough site.
 
