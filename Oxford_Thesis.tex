@@ -195,7 +195,8 @@
 % This is where the whole-document ToC appears:
 \tableofcontents
 
-
+\listoffigures
+	\mtcaddchapter
 % \mtcaddchapter is needed when adding a non-chapter (but chapter-like) entity to avoid confusing minitoc
 
 % Uncomment to generate a list of tables:
@@ -221,6 +222,10 @@
 \include{text/ch5-CHECNSB}
 \include{text/ch6-Conclusions}
 
+\startappendices
+% Add or remove any appendices you'd like here:
+\include{text/appendix-1}
+\include{text/appendix-2}
 
 %%%%% REFERENCES
 
