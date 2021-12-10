@@ -613,7 +613,7 @@ archivePrefix = {arXiv},
 
 @misc{gal2015,
     title={Bayesian Convolutional Neural Networks with Bernoulli Approximate Variational Inference},
-    author={Yarin Gal and Zoubin Ghahramani},
+    author={Gal, Y.},
     year={2015},
     eprint={1506.02158},
     archivePrefix={arXiv},
@@ -621,7 +621,7 @@ archivePrefix = {arXiv},
 }
 
 @inproceedings{thomas,
-author={Mikael Jacquemont and others},
+author={Jacquemont, M and others},
 title={Indexed Operations for Non-rectangular Lattices Applied to Convolutional Neural Networks},
 booktitle={Proceedings of the 14th International Joint Conference on Computer Vision, Imaging and Computer Graphics Theory and Applications - Volume 5 VISAPP: VISAPP,},
 year={2019},
@@ -754,26 +754,6 @@ year = {2017}
        adsurl = {https://ui.adsabs.harvard.edu/abs/1983ApJ...272..317L},
       adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
-
-@InProceedings{factfpga,
-author="Buschj{\"a}ger, Sebastian
-and Pfahler, Lukas
-and Buss, Jens
-and Morik, Katharina
-and Rhode, Wolfgang",
-editor="Dong, Yuxiao
-and Mladeni{\'{c}}, Dunja
-and Saunders, Craig",
-title="On-Site Gamma-Hadron Separation with Deep Learning on FPGAs",
-booktitle="Machine Learning and Knowledge Discovery in Databases: Applied Data Science Track",
-year="2021",
-publisher="Springer International Publishing",
-address="Cham",
-pages="478--493",
-abstract="Modern high-energy astroparticle experiments produce large amounts of data everyday in continuous high-volume streams. The First G-APD Cherenkov Telescope (FACT) aims at detecting particle showers of gamma rays, because cosmic events can be derived from the energy and angle of gamma rays. The separation of gamma rays from background noise, which is inevitably recorded, is called the Gamma-Hadron separation problem. Current solutions heavily rely on hand-crafted features. The current approach computes these features in a long data processing pipeline and trains a random forest classifier for the Gamma-Hadron separation. The overall machine learning pipeline is executed on commodity computer hardware after an event has occurred. In this paper, we propose an alternative approach which applies (Binary) Convolutional Neural Networks (B-CNN) directly to the raw feature stream of the telescope's camera. We investigate if these models can be executed on commodity hardware available at the telescope to handle its datastream in real time. For fully Binary Neural Networks we also study the use of FPGAs for inference. Our experiments show that this approach outperforms hand-crafted features and random forests by a large margin, while still being applicable in real-time for moderate sized models. Furthermore, we show that our approach does not only work well on simulated data, but also on real cosmic events originating in the Crab Nebula, a supernova remnant.",
-isbn="978-3-030-67667-4"
-}
-
 
 @ARTICLE{ParsonsOhm,
        author = {{Parsons}, R.~D. and {Ohm}, S.},
@@ -913,6 +893,16 @@ booktitle = {36th International Cosmic Ray Conference (ICRC2019)},
    adsurl = {https://ui.adsabs.harvard.edu/abs/1987PhDT.........9C},
   adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
+@incollection{factfpga,
+	doi = {10.1007/978-3-030-67667-4_29},
+	url = {https://doi.org/10.1007%2F978-3-030-67667-4_29},
+	year = 2021,
+	publisher = {Springer International Publishing},
+	pages = {478--493},
+	author = {Sebastian Buschjäger and Lukas Pfahler and Jens Buss and Katharina Morik and Wolfgang Rhode},
+	title = {On-Site Gamma-Hadron Separation with Deep Learning on {FPGAs}},
+	booktitle = {Machine Learning and Knowledge Discovery in Databases: Applied Data Science Track}
+}
 @article{magicmoon,
    title={Performance of the MAGIC telescopes under moonlight},
    volume={94},
@@ -956,7 +946,7 @@ booktitle = {36th International Cosmic Ray Conference (ICRC2019)},
 
 @misc{chebnet,
     title={Convolutional Neural Networks on Graphs with Fast Localized Spectral Filtering},
-    author={Michael Defferrard and Xavier Bresson and Pierre Vandergheynst},
+    author={Defferrard M. and others},
     year={2016},
     eprint={1606.09375},
     archivePrefix={arXiv},
@@ -964,8 +954,7 @@ booktitle = {36th International Cosmic Ray Conference (ICRC2019)},
 }
 
 @ARTICLE{deepexplain,
-       author = {{Ancona}, Marco and {Ceolini}, Enea and {Oztireli}, Cengiz and
-         {Gross}, Markus},
+       author = {{Ancona}, M. and others},
         title = "{Towards better understanding of gradient-based attribution methods for Deep Neural Networks}",
       journal = {arXiv e-prints},
      keywords = {Computer Science - Machine Learning, Statistics - Machine Learning},
@@ -1903,6 +1892,15 @@ doi = {10.26093/cds/vizier}}
    month={5},
    pages={74}
 }
+
+@misc{bayesdeblend,
+      title={A Bayesian Convolutional Neural Network for Robust Galaxy Ellipticity Regression}, 
+      author={Claire Theobald and Bastien Arcelin and Frédéric Pennerath and Brieuc Conan-Guez and Miguel Couceiro and Amedeo Napoli},
+      year={2021},
+      eprint={2104.09970},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
 @misc{hintonicrc30,
       title={Gamma-ray Astronomy}, 
       author={Jim Hinton},
@@ -2123,7 +2121,7 @@ howpublished = {\url{https://pypi.org/project/nsb/}}
 }
 
 @article{escape,
-   title={GAMMA-RAYS FROM THE QUASAR PKS 1441+25: STORY OF AN ESCAPE},
+   title={Gamma-rays from the Quasar PKS 1441+25: Story of an Escape},
    volume={815},
    ISSN={2041-8213},
    url={http://dx.doi.org/10.1088/2041-8205/815/2/L22},
@@ -2142,6 +2140,12 @@ author = {Watson,J and others},
 title = {sstcam-simulation},
 year = {2021},
 howpublished = {\url{https://github.com/sstcam/sstcam-simulation}}
+}
+@misc{graphcore ,
+author = {Brown,P and others},
+title = {Graphcore sets new AI Performance Standards with MK2 IPU Systems},
+year = {2021},
+howpublished = {\url{https://www.graphcore.ai/posts/graphcore-sets-new-ai-performance-standards-with-mk2-ipu-systems}}
 }
 @ARTICLE{samdl,
        author = {{Spencer}, S. and {Armstrong}, T. and {Watson}, J. and {Mangano}, S. and {Renier}, Y. and {Cotter}, G.},

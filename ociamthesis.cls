@@ -266,7 +266,7 @@
 }
 {\end{alwayssingle}}
 \newenvironment{originality}%
-{   \begin{alwayssingle}\chapter*{Statement of Originality}
+{   \begin{alwayssingle}\chapter*{Statement of Authorship}
     \thispagestyle{empty}
 	\pagestyle{empty}
 	\setlength{\baselineskip}{\frontmatterbaselineskip}

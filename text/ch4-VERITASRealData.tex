@@ -1,7 +1,7 @@
 \chapter{\label{ch:4-VERITASRealData} Challenges of Applying Deep Learning Event Classification Methods to Real Observations with VERITAS}
 \minitoc
 \begin{abstract}
-    It is becoming increasingly recognised that artefacts in real IACT data have the potential to seriously disrupt the efficacy of deep-learning-based event classifiers. This issue has so far been relatively poorly understood, and these artefacts are not modelled in simulations. In this chapter, we attempt to investigate the difficulties in performing observations with real observations from VERITAS when a deep learning event classifier is used. In contrast with previous efforts with H.E.S.S. data, we do not use tailcut image cleaning with charge data. We also explore the limitations of using a custom simulation approach as a means of mitigating real observations issues, as well as the utilisation of Bayesian optimisation (which for the first time we attempt to use against real IACT data). After developing a pipeline for performing deep learning analysis with VERITAS data, we present the first detection of the Crab Nebula using a deep learning event classifier with a stereoscopic IACT array. We conclude that with current computational power and techniques, the complexity and cost of optimising deep learning event classifiers in this manner is significant. This limits the current applicability of these methods to current generation instruments or data from CTA.
+    It is becoming increasingly recognised that artefacts in real IACT observations have the potential to seriously disrupt the efficacy of deep-learning-based event classifiers. This issue has so far been relatively poorly understood, and these artefacts are not modelled in simulations. In this chapter, we attempt to investigate the difficulties in performing observations with real observations from VERITAS when a deep learning event classifier is used. In contrast with previous efforts with H.E.S.S. data, we do not use tailcut image cleaning with charge data. We also explore the limitations of using a custom simulation approach as a means of mitigating real observations issues, as well as the utilisation of Bayesian optimisation (which for the first time we attempt to use against real IACT observations). After developing a pipeline for performing deep learning analysis with VERITAS data, we present the first detection of the Crab Nebula using a deep learning event classifier with a stereoscopic IACT array. We conclude that with current computational power and techniques, the complexity and cost of optimising deep learning event classifiers in this manner is significant. Whilst these methods are still promising, this limits the current practicality of these methods to current generation instruments or data from CTA.
 \end{abstract}
 
 \section{Introduction}
@@ -219,7 +219,7 @@ Figures \ref{fig:cr2_trainlog}, \ref{fig:cr2_sigeff}, \ref{fig:cr2_hist}, \ref{f
         \centering \includegraphics[width=\columnwidth]{figures/sig1d.png}
 
         \caption{
-                \label{fig:sig1d} The 1 dimensional significance distribution including the source region (Red) and excluding it (Blue) and a Gaussian fit to the cosmic ray background (Green). Significances in IACT $\gamma$-ray astronomy are defined by \cite{LiMa}.
+                \label{fig:sig1d} The 1D significance distribution including the source region (Red) and excluding it (Blue) and a Gaussian fit to the cosmic ray background (Green). Significances in IACT $\gamma$-ray astronomy are defined by \cite{LiMa}.
         }
 \end{figure}
 Given these results, it appears as though custom simulations (as they are achievable with VERITAS) on their own are not enough to bridge the domain gap between real IACT data and simulations. The poor, noisy performance on validation data throughout the training process is a common feature we observed in using these ConvLSTM2D methods, and is part of the reason we did not use such data in Chapter \ref{ch:3-TimingInfo}. We will find that hyperparameter selection is an important element of this, but we could also be observing a result of the small batch sizes needed to fit such models onto GPUs with finite VRAM.
@@ -401,7 +401,7 @@ Curiously the validation data training curve appears to converge in this one spe
         \centering \includegraphics[width=\columnwidth]{figures/opt4_sig.png}
 
         \caption{
-                \label{fig:opt4_sig1D} The 1 dimensional significance for the 'opt4' configuration on run 64080.
+                \label{fig:opt4_sig1D} The 1D significance for the `opt4' configuration on run 64080.
         }
 \end{figure}
 
@@ -536,7 +536,7 @@ Following our initial success with Bayesian optimisation, we ran extensive furth
         \centering \includegraphics[width=\columnwidth]{figures/convplot_testfolders3.png}
 
         \caption{
-                \label{fig:convplot_testfolders3} Final test accuracies after  training optimisation for longer Bayesian optimisation run attempt A
+                \label{fig:convplot_testfolders3} Final test accuracies after  training optimisation for longer Bayesian optimisation run attempt A.
         }
 \end{figure}
 \begin{figure}[h] 
