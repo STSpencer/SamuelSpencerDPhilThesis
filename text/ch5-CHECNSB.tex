@@ -1,5 +1,9 @@
 \chapter{\label{ch:5-CHECNSB} Advanced Study of SSTCAM NSB}
 \minitoc
+\begin{abstract}
+    Night Sky Background (NSB) is a complex phenomenon, consisting of all light detected by imaging atmospheric Cherenkov telescopes not attributable to Cherenkov light emission. Understanding the effect of NSB on cameras for the next-generation Cherenkov Telescope Array (CTA) is important, as it affects the astrophysical systematic errors on observations, the ability of the telescopes to operate under partial moonlight conditions and the thermal control of the cameras. The capacity to observe under partial moonlight conditions is crucial for the CTA transient science programme, as it substantially increases the potential observing time. Using tools initially developed for H.E.S.S. (in combination with the prototype CTA analysis package ctapipe) we will present predictions for the NSB present in images taken by the Small Sized Telescope Camera (SSTCAM), showing that SSTCAM will likely be able to meet the associated CTA requirements. Additionally, we calculate the potential observing time gain by operating under high NSB conditions.
+\end{abstract}
+
 \section{Introduction}
 \label{sec:intro}
 
@@ -9,25 +13,28 @@ As we've seen in Chapters \ref{ch:3-TimingInfo} and \ref{ch:4-VERITASRealData}, 
 
 \subsection{Context}
 \label{sec:intro:context}
-The ability for SSTCAM to operate reliably under partially moonlight and other high NSB observing conditions is critical to the transient and multi-messenger/multi-wavelength science goals of CTA, as it significantly increases the possible observing time. As a result, this ability to operate under moonlit conditions results in a CTA system requirement. The increase in potential science return has been judged to outweigh the associated increase in data rate and person-power required to operate the telescopes. The most notable example for this is the detection of prompt TeV emission from GRB 190114C (the first such detection from the ground), which was detected under partial moonlit (6 times nominal NSB) conditions with MAGIC \cite{magicGRB}. 
+The ability for SSTCAM to operate reliably under partial moonlight and other high NSB observing conditions is critical to the transient and multi-messenger/multi-wavelength science goals of CTA. This is as operating under these conditions significantly increases the possible observing time, and so this ability has been designated as a CTA system requirement.  The increase in potential science return was judged to outweigh the associated increase in data rate and person-power required. The most notable justification for this is the detection of prompt TeV emission from GRB 190114C (the first such detection from the ground) under partial moonlight conditions (6 times nominal NSB) with MAGIC \cite{magicGRB}. 
 
-Studies of partial moonlight and high NSB observations can also help inform temperature management and SiPM selection for SSTCAM, as well as inform estimations of astrophysical systematic errors (particularly on flux normalization, see in a paper by MAGIC \cite{magicmoon}) as well as the energy threshold \cite{magicmoon}. The continuous rate of illumination, analogous to a constant NSB value, across the camera plane affects almost all measurable properties of SiPMs. This is as the bias voltage across the SiPMs is reduced which in turn reduces their sensitivity to light \cite{1mhighnsb}. The majority of previous studies concerning NSB for SiPM-based Cherenkov cameras have primarily focused on NSB's effect on single SiPM pixels \cite{1mhighnsb} \cite{2msipm} \cite{1mcalib} \cite{lstnsb}. The work presented in this chapter is the first detailed simulations of an entire SiPM-based camera's worth of NSB, allowing us to evaluate both the spatial and temporal properties of NSB across the camera plane.
+Studies of partial moonlight and other high NSB observations can inform temperature management protocols and SiPM selection for SSTCAM. They can also inform estimations of astrophysical systematic errors, particularly on flux normalization, and the energy threshold \cite{magicmoon} (both seen in a paper by MAGIC \cite{magicmoon}). This is a result of the sensitivity to light of an SiPM being a function of its illumination \cite{1mhighnsb}. The majority of previous studies concerning NSB for SiPM-based Cherenkov cameras have primarily focused on NSB's effect on single SiPM pixels \cite{1mhighnsb} \cite{2msipm} \cite{1mcalib} \cite{lstnsb}; the work presented in this chapter is the first detailed study of an entire SiPM-based camera's worth of NSB, allowing us to evaluate both the spatial and temporal properties of NSB across the camera plane.
 
-SiPMs are typically operated with a bias circuit with a resistor connected in series, to protect the SiPMs from drawing too much current from the power supply and being damaged. We need to determine the correct bias voltage to set for this system, so we define the overvoltage as $\Delta V=V_{PS}-V_{BD}$, where $V_{BD}$ is the breakdown voltage (the minimum (reverse) bias voltage under which electron avalanche production is possible in an SiPM) and $V_{PS}$ is the bias voltage supplied by the power supply \cite{1mhighnsb}. As a change in NSB rate results in a change of the overvoltage of the SiPMs, which in turn affects the photomultiplier calibration. SSTCAM hopes to counter this with the LED flasher system, and so the rate of change of NSB in the camera affects the number and rate of LED flashes required to achieve a desired calibration accuracy. We consider the necessary rate of LED flashes to correct for the effects of NSB later in this chapter.
+Light illuminating a SiPM leads to a current flowing through it, so SiPMs are typically operated with a bias resistor connected in series to prevent the SiPMs from being damaged by drawing too much current from the power supply. Current flow through this bias resistor leads to a drop in voltage $V_{Drop}$ across the bias stage, which in turn reduces the current through the SiPM. This bias resistor therefore functions as part of a negative feedback loop, affecting the overvoltage across the SiPM defined as $\Delta V=V_{PS}-V_{BD}$. Here, $V_{BD}$ is the breakdown voltage; this is the minimum (reverse) bias voltage under which electron avalanche production is possible in a SiPM. $V_{BD}$ is a function of the current flowing through the SiPM, and so $V_{BD}$ is a function of $V_{Drop}$. Finally, $V_{PS}$ is the voltage supplied by the power supply \cite{1mhighnsb}. As $\Delta V$ affects most of the measurable properties of the SiPM, such as gain and Photo Detection Efficiency (PDE), it also affects the photomultiplier calibration. SSTCAM will counter this calibration shift with a LED flasher system, which is designed to calibrate the camera in near-real-time. Therefore the rate of change of NSB in the camera affects the number and rate of LED flashes required to achieve a desired near-real-time calibration accuracy. We consider the necessary rate of LED flashes to correct for the effects of NSB later in this chapter.
+
 \subsection{Model}
 \label{sec:intro:model}
 
-The standard \textit{CORSIKA/sim\_telarray} simulation package \cite{simtel}, used for CTA Monte-Carlo simulation productions, supports NSB maps as an input parameter. It also has some limited functionality to replicate illumination at an infinite distance from the camera (i.e. stars). For reasons of computational efficiency, it does not calculate where in the camera and how bright those stars might be, nor does it realistically simulate the effect of moonlight. We model NSB using the \textit{nsb} package, which assumes that NSB comes from two primary sources. The first is starlight using \textit{Gaia} data, and the second is sky brightness taking account of moonlight and a local extinction coefficient following the semi-analytic model of Krisciunas and Schaeffer \cite{Krisciunas}. The Krisciunas and Schaeffer model was originally fit to data from Mauna Kea before being extended later with additional weight parameters accounting for the relative brightness between the sky and the extra component of starlight in the \textit{hess\_basic} model included in \textit{nsb}. The \textit{hess\_basic} model is expressed as:
+The standard \textit{CORSIKA/sim\_telarray} simulation package \cite{simtel}, used for CTA Monte-Carlo simulation productions, supports NSB maps as an input parameter. It also has some limited functionality to replicate illumination at an infinite distance from the camera (i.e. stars). For reasons of computational efficiency, it does not calculate where in the camera and how bright those stars might be, nor does it realistically simulate the effect of moonlight. So we choose to model NSB using the \textit{nsb} package, which assumes that NSB comes from two primary sources. The first NSB source is starlight using \textit{Gaia} data, and the second is sky brightness taking account of moonlight and a local extinction coefficient following the semi-analytic model of Krisciunas and Schaeffer \cite{Krisciunas}. \textit{nsb} makes use of the standard Hierarchical Equal Area isoLatitude Pixelation of a sphere (healpix) pacakge to produce skymaps where each pixel covers the same surface area as every other pixel on the sky \cite{healpix}, using which the \textit{hess\_basic} model is expressed as
 \begin{equation}
-    f(\rho, A, B, C) = 10^{A}\times (1.06+\cos^2(\rho))+10^{B-\rho/40}+C \times 10^7 \times \rho^2,
+    f(\rho, A, B, C) = 10^{A}\times (1.06+\cos^2(\rho))+10^{(B-\rho/40)}+C \times 10^7 \times \rho^2,
+    \label{eq:f}
 \end{equation}
 
 \begin{equation}
     I_{M} (\alpha_{M}) = 10^{-0.4 \times (3.84 + 0.026 \times |\alpha_{M}| + 4 \times 10^{-9} \times \alpha_{M}^4))},
+    \label{eq:Im}
 \end{equation}
 
 \begin{equation}
-    X(Z)=\begin{cases} (1-0.96\sin^2 Z)^{-0.5} & \mbox{, if }  Z<=\pi/2 \\ (1 - 0.96 \times 1)^{-0.5} & \mbox{, otherwise } \end{cases},
+    X(Z)=\begin{cases} (1-0.96\sin^2 Z)^{-0.5} & \mbox{, if }  Z\leq\pi/2 \\ (1 - 0.96 \times 1)^{-0.5} & \mbox{, otherwise } \end{cases},
 \end{equation}
 
 \begin{equation}
@@ -37,20 +44,22 @@ The standard \textit{CORSIKA/sim\_telarray} simulation package \cite{simtel}, us
 \end{equation}
 
 \begin{equation}
-    B_{Sky}(Z,\phi,B_0,k)=\begin{cases} B_0\times X(Z) \times 10^{-0.4k(X(Z)-1)} & \mbox{, if }  Z<=\pi/2 \\ 0 & \mbox{, otherwise } \end{cases},
+    B_{Sky}(Z,\phi,B_0,k)=\begin{cases} B_0\times X(Z) \times 10^{-0.4k(X(Z)-1)} & \mbox{, if }  Z\leq\pi/2 \\ 0 & \mbox{, otherwise } \end{cases},
+    \label{eq:Bs}
 \end{equation}
 
 \begin{equation}
     B_{Total}=B_{Moon}+B_{Sky}+B_{Gaia}
+    \label{eq:Bt}
 \end{equation}
 
-where $B_{Total}$ is the total brightness for a given point on the sky, $B_{Moon}$ is the surface brightness from moonlight, $B_{Sky}$ is the intrinsic surface brightness of the sky, $B_{Gaia}$ is the brightness of stars in the associated healpix pixel \cite{healpix}, $Z$ is the Zenith angle, $\phi$ is the azimuth (with subscript $_M$ referring to Moon parameters rather than source parameters), $f(\rho,A,B,C)$ is the scattering function as a function of lunar great circle separation angle $\rho$ (which takes into account in this form both Rayleigh scattering from atmospheric gases and Mie scattering from atmospheric aerosols), $\alpha_M$ is the phase angle of the Moon and $I_m$ is the illuminance of the Moon in footcandels. $A$,$B$,$C$,$k_0$ and $B_0$ are all free parameters to be determined, values used are in Table \ref{tab:params}. $B_{Total}$ (along with all the other native outputs from the \textit{hess\_basic} \textit{nsb} model) is expressed here in nanoLamberts (nLb), where a brightness in nanoLamberts $B$ relates to magnitudes per square arc second in the V band ($V$) through
+where $B_{Total}$ is the total brightness for a given pixel on the sky, $B_{Moon}$ is the surface brightness from moonlight (compared to the same region of sky without the moon present), $B_{Sky}$ is the intrinsic surface brightness of the sky, $B_{Gaia}$ is the brightness of stars in the healpix pixel \cite{healpix}, $Z$ is the Zenith angle, $\phi$ is the azimuth (with subscript $_M$ referring to Moon parameters rather than source parameters), $I_m$ is the illuminance of the Moon in footcandels, $X(Z)$ represents the optical pathlength along the line of sight in units of air masses, $B_0$ is a constant representing the brightness of the sky at the zenith and $f(\rho,A,B,C)$ is the scattering function as a function of lunar great circle separation angle $\rho$. In this form $f(\rho,A,B,C)$ takes into account both Rayleigh scattering from atmospheric gases and Mie scattering from atmospheric aerosols (larger solid particles suspended in the atmosphere). Rayleigh and Mie scattering occur at different altitudes and over different distributions of scattering particles in the atmosphere and so require individual (empirically determined) functional forms; $A$ and $B$ are the fitted coefficients to quantify the relative contributions of Rayleigh and Mie scattering respectively. $A$ and $B$ were introduced in the Krisciunas and Schaeffer \cite{Krisciunas} work, but the additional $C$ parameter in Equation \ref{eq:f} was added by the creators of the \textit{hess\_basic} model to account for the relative brightness of the sky to the stars from \textit{Gaia}. The factors of $-0.4k$ that appear in the exponents of Equations \ref{eq:Im} to \ref{eq:Bs} are a result of a simplification of an integral over a volume extinction coefficient, where $k$ is the measured extinction coefficient along the line of sight (see \cite{Krisciunas} for further details). The remainder of the exponent in Equation \ref{eq:Im} is an empirical fit \cite{Krisciunas}; all the fitted values used are presented in Table \ref{tab:params}. $B_{Total}$ (along with all the other native outputs from the \textit{hess\_basic} \textit{nsb} model) are expressed here in nanoLamberts (nLb), where a brightness in nanoLamberts $B$ relates to magnitudes per square arc second in the V band ($V$) through
 \begin{equation}
     \frac{B}{\textrm{nanoLamberts}}=34.08\exp(20.7233-0.92104\times V)
 \end{equation}
 \cite{Krisciunas}.
 
-The stellar data in \textit{nsb} is obtained using \textit{dr1b} stellar magnitude data from the \textit{Gaia} space mission \cite{gaiadr1a} \cite{gaiadr1b}. Understanding the behaviour of the SiPMs under the illumination of a particularly bright star is important for the future operation plan of SSTCAM. Current practice of most Cherenkov cameras is turning the High Voltage (HV) power supply of blocks of pixels containing such bright stars off. SSTCAM will not always have to do this as saturating SiPMs is more tolerable than with them than conventional photomultipliers. If we choose to alter bias voltage for such pixels, it may be adjusted pre-emptively or as a reaction; this is further complicated by the need to use such stars for the slow-signal pointing calibration simultaneously. 
+The stellar data in \textit{nsb} is obtained using \textit{dr1} stellar magnitude data from the \textit{Gaia} space mission \cite{gaiadr1a} \cite{gaiadr1b}. Understanding the behaviour of the SiPMs under the illumination of a particularly bright star is important for the future operation plan of SSTCAM. Current practice of most Cherenkov cameras is turning the High Voltage (HV) power supply of blocks of pixels containing such bright stars off. SSTCAM will not always have to do this as saturating SiPMs is more tolerable compared to conventional photomultipliers. If we choose to alter bias voltage for such pixels, it may be adjusted pre-emptively or as a reaction; this is further complicated by the need to use such stars for the slow-signal pointing calibration simultaneously. 
 
 Given lack of data from an SSTCAM prototype on the Paranal site it is currently not possible to fit the relative coefficients of the stellar and semi-analytic components of the model.  It should also be noted that the \textit{nsb} package does not explicitly take into account certain other known sources of NSB from both the telescope structure, the environment and astronomical sources. In particular we neglect contributions from:
 \begin{itemize}
@@ -63,7 +72,7 @@ Given lack of data from an SSTCAM prototype on the Paranal site it is currently 
     \item Lightning, which could cause rapid changes in camera illumination, however the CTA weather monitoring system might be able to prevent this from having too large an effect on camera operation.
 \end{itemize}
 All of these effects should, however, be much smaller than the differences between astronomical dark time and full moonlight.
-\begin{figure}[ht]
+\begin{figure}[t!]
 \begin{centering}
 %L, B, R, T
 \includegraphics[width=\columnwidth]{./figures/bandeplot.png}
@@ -78,7 +87,20 @@ All of these effects should, however, be much smaller than the differences betwe
 \subsection{Recommended Parameter Values}
 \label{sec:examples:params}
 
-Many free \textit{nsb} parameters can be set automatically using automatic config generator functions we developed, but some parameters still meed to be set manually. Part of the work for this project was determining what to set these free parameters to for simulations of SSTCAM. After investigating, the \textit{nsb} run parameters we recommend for SSTCAM are in Table \ref{tab:params}. We ensure that there is more than one \textit{nsb} FoV map pixel, and more than one healpix pixel within in the diameter of every SSTCAM pixel on sky. Otherwise the \textit{photutils} component of the scripts will fail, and it will not be possible to obtain meaningful Nyquist sampled per-pixel estimates. The parameter selection needed to fulfill these conditions significantly slows \textit{nsb}, but time can be saved by using the same parameter configuration consistently as \textit{Gaia} catalogues and healpix maps are generated whenever the configuration changes. An \textit{nsb} simulation run with these parameters takes approximately 6 hours on a single CPU core to generate an All-Sky Map, an FoV map and a corresponding FITS file (which is typically $\mathrm{763\,Mb}$ large using the recommended parameters). This is somewhat longer than the amount of time for which such a map prediction remains accurate, which is around 20 minutes of observing time. It should also be noted that \textit{nsb} is comparatively RAM heavy, needing around $\mathrm{9\,GB}$ for these conditions. These RAM constraints rule out performing such simulations on the European Grid Infrastructure using CTA-DiRAC as typical grid nodes tend to only have $\mathrm{4\,GB}$ of RAM. Obtaining per-pixel estimates from these FoV maps is much faster (taking only a few minutes).
+Figure \ref{fig:Moonlight_workflow} shows our workflow for generating NSB maps. Many free \textit{nsb} parameters can be set automatically using automatic config generator functions we developed, but some parameters still need to be set manually. Part of the work for this project was determining what to set these free parameters to for simulations of SSTCAM. After investigating, the \textit{nsb} run parameters we recommend for SSTCAM are in Table \ref{tab:params}. The form of the Nyquist-Shannon sampling theorem relevant for image analysis in astronomy (to quote from \cite{nyquist}) is 
+\begin{quote}
+Aliasing error is something like a beat phenomenon between the sampling frequency and higher frequencies in the information spectrum, and as such is a form of systematic error at the grid points themselves of the digitized image ... the light signal must be sampled at least twice as frequently, in traversal of the continuous image, as the cresting in the finest sinusoid in its Fourier decomposition, if this aliasing error is to be avoided.
+\end{quote}
+As a result, in order to properly sample the \textit{nsb} maps for our pixel extraction, we ensure that there is more than one \textit{nsb} FoV map pixel, and more than one healpix pixel within in the diameter of every SSTCAM pixel on sky. The parameter selection needed to fulfill these conditions significantly slows \textit{nsb}, but time can be saved by using the same parameter configuration consistently as \textit{Gaia} catalogues and healpix maps are generated whenever the configuration changes. An \textit{nsb} simulation run with these parameters takes approximately 6 hours on a single CPU core to generate an All-Sky Map, an FoV map and a corresponding FITS file (which is typically $\mathrm{763\,Mb}$ large using the recommended parameters). This is somewhat longer than the amount of time for which such a map prediction remains accurate, which is around 20 minutes of observing time. It should also be noted that \textit{nsb} is comparatively RAM heavy, needing around $\mathrm{9\,GB}$ for these conditions. These RAM constraints rule out performing such simulations on the European Grid Infrastructure using CTA-DiRAC as typical grid nodes tend to only have $\mathrm{4\,GB}$ of RAM. Obtaining per-pixel estimates from these FoV maps is much faster (taking only a few minutes).
+
+\begin{figure}[t!] 
+        % read manual to see what [t!] means and for other possible options
+        \centering \includegraphics[width=0.58\columnwidth]{figures/Moonlight_workflow.png}
+
+        \caption{
+                \label{fig:Moonlight_workflow} The workflow we developed for generating our NSB maps. Following the same design language used in earlier chapters, grey rectangles represent parameter inputs, blue rectangles intermediate data products, red ellipses final outputs and scripts in green rounded rectangles. Some parameters have to be input in multiple places due to the design of \textit{nsb}. The stellar catalogue and healpix cell catalogue are generated the first time that \textit{nsb} runs with a particular set of parameters, but these are then saved and reused, cutting down on the time needed to generate subsequent NSB maps.
+        }
+\end{figure}
 
 \begin{table}
     \centering
@@ -122,7 +144,7 @@ Many free \textit{nsb} parameters can be set automatically using automatic confi
 
 \subsection{World Co-ordinate System Description}
 
-To perform aperture photometry on a fits file using co-ordinate data from \textit{ctapipe} \cite{ctapipe2}, one needs to define a World Co-ordinate System (WCS) for the FITS output from \textit{nsb}. This is not automatically written by \textit{nsb} upon the FoV map being created, but it can be provided by the user manually in an \textit{astropy} WCS dictionary. The requisite WCS coefficient values can be determined by dividing the FoV set in nsb by the number of pixels in the FoV map, and setting the centre of the FITS image to the RA/DEC to which \textit{nsb} has been aimed. These are listed in Table \ref{tab:WCS}, assuming that the parameters in Table \ref{tab:params} are used. It should be noted that the CTYPE parameters affect the size of the FoV that needs to be used with \textit{nsb}, tangential projections (TAN) are preferable as they result in only a 10 degree FoV being required to reliably perform that aperture photometry, which reduces the computational cost of running \textit{nsb}, an alternative healpix projection requires 12 degrees to be simulated to prevent Not a Number (NaN) values being produced at the camera edge by \textit{photutils}.
+To perform aperture photometry on a fits file using co-ordinate data from \textit{ctapipe} \cite{ctapipe2}, one needs to define a World Co-ordinate System (WCS) for the FITS output from \textit{nsb}. This is not automatically written by \textit{nsb} upon the FoV map being created, but it can be provided by the user manually in an \textit{astropy} WCS dictionary. The requisite WCS coefficient values can be determined by dividing the FoV set in \textit{nsb} by the number of pixels in the FoV map, and setting the centre of the FITS image to the RA/DEC to which \textit{nsb} has been aimed. These are listed in Table \ref{tab:WCS}, assuming that the parameters in Table \ref{tab:params} are used. It should be noted that the CTYPE parameters affect the size of the FoV that needs to be used with \textit{nsb}, tangential projections (TAN) are preferable as they result in only a 10 degree FoV being required to reliably perform that aperture photometry, which reduces the computational cost of running \textit{nsb}, an alternative HPX healpix projection requires 12 degrees to be simulated to prevent Not a Number (NaN) values being produced at the camera edge by the pixel extractor script (which we discuss in Subsection \ref{sec:pixelextract}).
 \begin{table}[]
     \centering
     \resizebox{0.8\textwidth}{!}{
@@ -152,25 +174,26 @@ To perform aperture photometry on a fits file using co-ordinate data from \texti
 \end{table}
 
 \subsection{Aperture Photometry}
-To accurately determine the NSB rates in individual pixels, one must perform aperture photometry on the FoV maps generated by \textit{nsb}. This can be performed using the pixel position information from \textit{ctapipe} \cite{ctapipe2} for a given observation time, location, altitude and azimuth. We then use the \textit{photutils} \textit{astropy}-affiliated \cite{astropy:2018} photometry package \cite{photutils} to integrate the FoV map around the pixel positions, assuming they have a rectangular geometry on-sky and a known pixel diameter (0.19$^{\circ}$). In effect, this numerically performs the integral
+\label{sec:pixelextract}
+To accurately determine the NSB rates in individual pixels, one must perform aperture photometry on the FoV maps generated by \textit{nsb}. This can be performed using the pixel position information from \textit{ctapipe} \cite{ctapipe2} for a given observation time, location, altitude and azimuth. The pixel extractor script then uses the \textit{photutils} \textit{astropy}-affiliated \cite{astropy:2018} photometry package \cite{photutils} to integrate the FoV map around the pixel positions, assuming they have a rectangular geometry on-sky and a known pixel diameter (0.19$^{\circ}$). In effect, this numerically performs the integral
 \begin{equation}
     B_{Pixel}=\int B_{Total} \cdot dA
 \end{equation}
 where $B_{Pixel}$ is the brightness of a camera pixel and $dA$ is a rectangular surface element on the sky, so it should be noted that $B_{Pixel}$ is therefore not a linear function of $B_{Moon}$, $B_{Sky}$ or $B_{Gaia}$. Validation was performed to ensure that the rotation of the camera images generated were consistent with the \textit{ctapipe} Engineering Camera Frame.
 
-This produces pixel maps in units of nLb/pixel, but in practice we need to convert this to Hz/pixel (which is the directly observable quantity). To do this, we assume the spectrum from \textit{nsb} to be uniform and perform the following calculation. Assuming that the results from \textit{nsb} covers the BP spectrum, and that they are spread evenly across the band, this implies
+This produces pixel maps in units of nLb/pixel, but in practice we need to convert this to Hz/pixel (which is the directly observable quantity). To do this, we assume the spectrum from \textit{nsb} to be uniform and perform the following calculation. Assuming that the results from \textit{nsb} cover the \textit{Gaia} Blue Photometer (BP) wavelength range ($\mathrm{330-680\,nm}$ \cite{gaiadr1b}), and that the \textit{nsb} results are spread evenly across the band, this implies
 
 \begin{equation}
     \mathrm{B (photons/(ns\ sr\ nm\ m^2) )=\frac{B (Lamberts)}{(10^4 / \pi \times E \times (680-330) \times 10^9)}}
 \end{equation}
 
-where $\mathrm{E=hc/(505\,nm)}$, we then multiply this by the range $\mathrm{300-550\,nm}$, multiply by an assumed 40\% Photo Detection Efficiency (PDE), and then multiply by the solid angle subtended by a pixel ($\mathrm{8 \times 10^{-6}\,sr}$), the mirror area ($\mathrm{7.3\,m^2}$) and the telescope transmission ($0.85$) to get an NSB rate in Hz. A similar result can be obtained through scaling the spectrum from Benn and Ellison \cite{BandE} (seen in Figure \ref{fig:BandE}) and using the existing \textit{sstcam-simulation} package \cite{sstcamsimulation}. The presence of strong emission lines in that spectrum results makes that method less appropriate, as it is unlikely that light from stars or moonlight will follow such a strongly peaked spectrum. The results from this analysis are written to an \textit{astropy} table whereby they can be further analysed at will. It should be noted that the workflow developed for this work could be reasonably trivially used by all CTA cameras, provided these basic parameters are known.
+where $\mathrm{E=hc/(505\,nm)}$ ($505\,nm$ being the centre of the BP wavelength range), we then multiply this by the range $\mathrm{300-550\,nm}$ (SSTCAM's wavelength range), multiply by an assumed 40\% PDE, and then multiply by the solid angle subtended by a pixel ($\mathrm{8 \times 10^{-6}\,sr}$), the mirror area ($\mathrm{7.3\,m^2}$) and the telescope transmission ($0.85$) to get an NSB rate in Hz. A similar result can be obtained through scaling the spectrum from Benn and Ellison \cite{BandE} (seen in Figure \ref{fig:BandE}) and using the existing \textit{sstcam-simulation} package \cite{sstcamsimulation}. The presence of strong emission lines in that spectrum results makes that method less appropriate, as it is unlikely that light from stars or moonlight will follow such a strongly peaked spectrum. The results from this analysis are written to an \textit{astropy} table whereby they can be further analysed at will. It should be noted that the workflow developed for this work could be reasonably trivially used by all CTA cameras, provided these basic parameters are known.
 
-Throughout this work we assume a CTA CHEC-S pixel geometry is roughly indicative of the final SSTCAM, though this will need to be updated once a full Monte Carlo model of the engineering camera has been created and a decision on the SiPM choice for SSTCAM has been made. The value most likely to affect the results presented here is the angular extent of the pixels on the sky. We also use the `SST-ASTRI' optical structure as defined by \textit{ctapipe}, though the effect of this upon the analysis is minimal, as even the effective focal length of the telescope optics is set manually to $\mathrm{2.15191\,m}$. Another likely source of complication that is not modelled here (as there's no trivial means of modelling it without resorting to full ray-tracing), is that for a 2 mirror Schwartzchild-Couder optical design telescope (with which SSTCAM was designed to operate) moonlight can reflect off of the secondary mirror in different ways compared to a single mirror design. The ongoing debate about the related issue of what colour to paint IACTs in order to minimise reflections from the telescope structure suggests that this effect will likely be small \cite{pinktelescope}.
+Throughout this work we assume a CTA CHEC-S pixel geometry is roughly indicative of the final SSTCAM, though this will need to be updated once a full Monte Carlo model of the engineering camera has been created and a decision on the SiPM choice for SSTCAM has been made. The value most likely to affect the results presented here is the angular extent of the pixels on the sky. We also use the `SST-ASTRI' optical structure as defined by \textit{ctapipe}, though the effect of this upon the analysis is minimal, as even the effective focal length of the telescope optics is set manually to $\mathrm{2.15191\,m}$ (this sets the plate scale of the camera and therefore determines the pixel size on-sky). Another likely source of complication that is not modelled here (as there's no trivial means of modelling it without resorting to full ray-tracing), is that for a 2 mirror Schwartzchild-Couder optical design telescope (with which SSTCAM was designed to operate) moonlight can reflect off of the secondary mirror in different ways compared to a single mirror design. The ongoing debate about the related issue of what colour to paint IACTs in order to minimise reflections from the telescope structure suggests that this effect will likely be small \cite{pinktelescope}.
 
 \label{sec:examples}
 \subsection{Pointing Validation}
-To verify the pointing accuracy of the \textit{nsb} fields, we ran an observation of Polaris through the \textit{nsb} chain (from the ASTRI site on Sicily), and verified the position of Polaris in the frame using the `V/50' Vizier catalogue \cite{vizier}. This is somewhat complicated by the fact that the WCS rotation angle keywords CROTA1 and CROTA2 are free parameters (partly because the \textit{ctapipe} skycoord.rotation and skycoord.roll fields are presently unfilled in the latest version of \textit{ctapipe}), but this investigation (and other similar tests we performed) give us confidence that at least the source pointed at will be within the FoV of the camera. This is largely unimportant for our purposes as our main goal for this study was to obtain statistical estimates of NSB under various conditions and not to, for example, use \textit{nsb} for pointing calibration studies (for which it was not designed).
+To verify the pointing accuracy of the \textit{nsb} fields, we ran an observation of Polaris through the \textit{nsb} chain (from the ASTRI site on Sicily). Polaris is expected to be present in the NSB model as it is included a dedicated list of bright \textit{Hipparcos} stars that is loaded by \textit{nsb} for every run (as the \textit{Gaia} \textit{dr1} catalog only goes up to $m_G=3.2$ \cite{gaiadr1b}). We then verified the position of Polaris in the frame using the `V/50' Vizier catalogue \cite{vizier}. This is somewhat complicated by the fact that the WCS rotation angle keywords CROTA1 and CROTA2 are free parameters (partly because the \textit{ctapipe} skycoord.rotation and skycoord.roll fields are presently unfilled in the latest version of \textit{ctapipe}), but this investigation (and other similar tests we performed) give us confidence that at least the source pointed at will be within the FoV of the camera. However, this complication means that off-centre sources may by rotated in the resultant pixel maps. This is largely unimportant for our purposes as our main goal for this study was to obtain statistical estimates of NSB under various conditions and not to, for example, use \textit{nsb} for pointing calibration studies (for which it was not designed).
 \begin{figure}[ht!]
 \begin{centering}
 %L, B, R, T
@@ -183,7 +206,7 @@ To verify the pointing accuracy of the \textit{nsb} fields, we ran an observatio
 \section{Results and Discussion}
 \subsection{Eta Carinae Observations Under Varying Conditions}
 \label{sec:etacarvary}
-\begin{figure}[ht]
+\begin{figure}[t!]
 \begin{centering}
 %L, B, R, T
 \includegraphics[width=1.0\columnwidth]{./figures/allskyetacardarkgauss3.png}
@@ -191,12 +214,26 @@ To verify the pointing accuracy of the \textit{nsb} fields, we ran an observatio
 \label{fig:allskyetacardarkgauss3}
 \end{centering}
 \end{figure}
-As a reasonable worst-case scenario, we consider four observing scenarios of the colliding wind binary Eta Carinae. Eta Carinae has recently been the subject of a major paper by H.E.S.S. \cite{hessetacar}, and it is accepted as a particularly difficult $\gamma$-ray source to observe with IACTs given the high stellar density in the region and the high number of UV photons produced (which causes false triggers, though this is not taken into account by \textit{nsb}). Firstly we consider a `dark' field, at the same altitude as Eta Carinae but differing azimuth, for comparison. This appears to be a reasonable choice of dark field more generally, as there is only a single star with a V-band magnitude brighter than 3 (Zeta Centauri, $m_V=2.55$), though through a search of NASA's HEASARC catalogue there are 8 4FGL \textit{Fermi} LAT point sources in the dark field, which may potentially have spectra that extend into the SST energy range (although this is unlikely as this is a high-galactic-latitude field meaning the 4FGL sources are likely blazars at high redshift). Secondly we consider observing Eta Carinae during astronomical dark time (at the same observing time as the dark field). Thirdly, we observe the Eta Carinae region with half moonlight present. This half moonlit scenario is designed to partially replicate the conditions for CTA requirement B-SST-1680, in this scenario the moon is above the horizon and has 0.53 Fractional Lunar Illumination (FLI). Finally we observe the region under full moonlight. The full moon scenario represents the worst possible observing conditions for Eta Carinae (and by extension the worst observing conditions possible), with the moon both at 1.0 FLI and well above the horizon. The significant all-sky illumination caused by this full moon, which completely dominates over the background stars, can be seen in Figure \ref{fig:allskyetacarextreme} (for comparison with the dark time all-sky plot in Figure \ref{fig:allskyetacardarkgauss3}).
+As a reasonable worst-case scenario, we consider four observing scenarios of the colliding wind binary Eta Carinae. Eta Carinae has recently been the subject of a major paper by H.E.S.S. \cite{hessetacar}, and  is considered to be a particularly difficult $\gamma$-ray source to observe with IACTs given the high stellar density in the region and the high number of UV photons produced (which causes false triggers, though this is not taken into account by \textit{nsb}). Firstly we consider a `dark' field, at the same altitude as Eta Carinae but differing azimuth, for comparison. This appears to be a reasonable choice of dark field more generally, as there is only a single star with a V-band magnitude brighter than 3 (Zeta Centauri, $m_V=2.55$), though through a search of NASA's HEASARC catalogue there are 8 4FGL \textit{Fermi} LAT point sources in the dark field, which may have spectra that extend into the SST energy range (although this is unlikely as this is a high-galactic-latitude field meaning the 4FGL sources are likely blazars at high redshift). Secondly we consider observing Eta Carinae during astronomical dark time (at the same observing time as the dark field). Thirdly, we observe the Eta Carinae region with half moonlight present. This half moonlit scenario is designed to partially replicate the conditions for CTA requirement B-SST-1680, in this scenario the moon is above the horizon and has 0.53 Fractional Lunar Illumination (FLI). Finally we observe the region under full moonlight. The full moon scenario represents the worst possible observing conditions for Eta Carinae (and by extension the worst observing conditions possible), with the moon both at 1.0 FLI and well above the horizon. The significant all-sky illumination caused by this full moon, which completely dominates over the background stars, can be seen in Figure \ref{fig:allskyetacarextreme} (for comparison with the dark time all-sky plot in Figure \ref{fig:allskyetacardarkgauss3}).
 
-In addition to pixel-wise analysis, we can also bin mean NSB values for these observations per superpixel and TM. This is important for understanding the triggering process, which relies on charge values per superpixel rather than per pixel, and for thermal control of the TM electronics (as each TM is thermally bonded to a chiller plate we need one temperature measurement per TM). These results can be seen in Figures \ref{fig:etacarpixel}, \ref{fig:etacarsuperpixel} and \ref{fig:etacarTM}.
+In addition to pixel-wise analysis, we can also bin mean NSB values for these observations per superpixel and TM. This is important for understanding the triggering process, which relies on charge values per superpixel rather than per pixel, and for thermal control of the TM electronics (as each TM is thermally bonded to a chiller plate we need one temperature measurement per TM). These results can be seen in Figures \ref{fig:etacarpixel}, \ref{fig:etacarsuperpixel} and \ref{fig:etacarTM}. Because the camera trigger rate is reliant upon two adjacent superpixels exceeding a configurable threshold (as discussed in Chapter \ref{ch:1-intro}), the camera readout rates will be significantly lower than the NSB photon rates presented here for individual pixels. Here is a rough calculation that demonstrates this effect \cite{richpc}:
 
-The results from this investigation are encouraging. For the dark field rate we achieve a rate of $\mathrm{43\,MHz}$, a calculation performed by K. Bernlohr using \textit{sim\_telarray} by scaling the Benn and Ellison spectrum \cite{BandE} gets $\mathrm{41.9\,MHz}$. Assuming Poisson error these results are in agreement. Even for the worst case scenario the average photon rate is within SSTCAM observing requirements, though the combination of moonlight and a bright stars means pixels greater with an NSB rate of more than a few GHz will need to be disabled (or have their HV ramped down) and removed from Cherenkov analysis in order to manage SiPM heating. In the case of brighter stars illuminating a pixel at around a GHz it is likely such pixels will only be removed from the trigger analysis.
-\begin{table}[h]
+\begin{itemize}
+    \item Let us assume the nominal NSB photon rate hitting an individual pixel is $40\,\mathrm{MHz}$ (the currently assumed SSTCAM rate \cite{richpc}).
+    \item There are approximately 10,000 SiPM $\mu\textrm{cells}$ per pixel \cite{jasonthesis}, which means that the mean NSB photon rate per $\mu\textrm{cell}$ is $\sim4\,\mathrm{kHz}$.
+    \item If SSTCAM is equipped with a digital trigger that requires approximately 10 $\mu\textrm{cells}$ to fire within the FWHM of our SiPM pulse length ($10.5\,\mathrm{ns}$), then the accidental trigger rate $A_{10}$ for 10 of our $\mu\textrm{cells}$ out of a total of $10,000\,\mu\textrm{cells}\times4$ (a single superpixel) is given by \cite{bradbury}
+    \begin{equation}
+        A_{10}=\frac{(4 \times 10,000)!}{10!(4 \times 10,000 - 10)!}(4\,\mathrm{kHz})^{10}(10.5\,\mathrm{ns})^{10-1} \approx 5\,\mathrm{kHz\ per\ superpixel}.
+    \end{equation}
+    \item Then as the backplane co-incidence trigger requires 2 neighbouring superpixels to trigger within $8\,\mathrm{ns}$ of each other, and there are 1910 combinations of our $2048/4=512$ superpixels that form neighbours, then the camera trigger rate $C_T$ is
+    \begin{equation}
+        C_T = 1910 \times (5\,\mathrm{kHz})^2 \times 8\,\mathrm{ns} \approx 380\,\mathrm{Hz}.
+    \end{equation}
+\end{itemize}
+It should be noticed that this rough calculation is very sensitive to the superpixel trigger threshold and the selected TARGET ASIC co-incidence window. 
+
+The results from our investigation are encouraging. For the dark field we compute a photon rate of $\mathrm{43\,MHz}$, a calculation performed by K. Bernlohr using \textit{sim\_telarray} by scaling the Benn and Ellison spectrum \cite{BandE} computes $\mathrm{41.9\,MHz}$. Assuming Poisson error these results are in agreement. Even for the worst case scenario the average photon rate is within SSTCAM observing requirements, though the combination of moonlight and a bright stars means pixels greater with an NSB rate of more than a few GHz will need to be disabled (or have their HV ramped down) and removed from Cherenkov analysis in order to manage SiPM heating. In the case of brighter stars illuminating a pixel at around a GHz it is likely such pixels will only be removed from the trigger analysis.
+\begin{table}[t!]
     \centering
     \resizebox{\textwidth}{!}{
 
@@ -214,7 +251,7 @@ The results from this investigation are encouraging. For the dark field rate we 
     \label{tab:etacar_params}
 \end{table}
 
-\begin{figure}[ht]
+\begin{figure}[t!]
 \begin{centering}
 %L, B, R, T
 \includegraphics[width=1\columnwidth]{./figures/allskyetacarextreme.png}
@@ -224,7 +261,7 @@ The results from this investigation are encouraging. For the dark field rate we 
 \end{figure}
 
 %% Figure example 
-\begin{figure}[h]
+\begin{figure}[t!]
 %L, B, R, T
 \begin{minipage}{\linewidth}\centering
 \subcaptionbox{Dark empty field.}{\includegraphics[width=0.48\linewidth]{./figures/etacardarkgauss3_Hz_pixel.png}}
@@ -237,7 +274,7 @@ The results from this investigation are encouraging. For the dark field rate we 
 \end{minipage}
 \end{figure} 
 
-\begin{figure}[h]
+\begin{figure}[t!]
 %L, B, R, T
 \begin{minipage}{\linewidth}\centering
 \subcaptionbox{Dark empty field.}{\includegraphics[width=0.48\linewidth]{./figures/Hz_Superpixel_dark.png}}
@@ -249,7 +286,7 @@ The results from this investigation are encouraging. For the dark field rate we 
 \end{minipage}
 \end{figure} 
 
-\begin{figure}[h]
+\begin{figure}[t!]
 %L, B, R, T
 \begin{minipage}{\linewidth}\centering
 \subcaptionbox{Dark empty field.}{\includegraphics[width=0.48\linewidth]{./figures/etacardarkgauss3_Hz_TM.png}}
@@ -262,15 +299,14 @@ The results from this investigation are encouraging. For the dark field rate we 
 \end{figure} 
 
 
-\subsection{Changes Between Adjacent Pixels for Eta Carinae}
+\subsection{Changes Between Adjacent Units for Eta Carinae}
 \label{sec:etacarajacent}
 
-We also re-analysed the data for the purposes of determining the maximum change between horizontally and vertically adjacent pixels, superpixels and TMs.
-This was performed by devising a function that, for every pixel in a 2D array, obtains the maximum change in mean NSB rate between itself and its adjacent neighbours (if they exist), then assigns that value to the pixel. This calculation negates changes in the PSF across the focal plane in the camera. The results from this investigation are shown in Figures \ref{fig:diffetacarpixel}, \ref{fig:diffetacarsuperpixel} and \ref{fig:diffetacarTM}.
+We also re-analysed the data for the purposes of determining the maximum change between horizontally and vertically adjacent pixels, superpixels and TMs. This is necessary to predict the influence of stars on the camera trigger (for individual pixels), on bright NSB regions on the superpixel trigger logic, and for understanding the thermal load on the cooling plate bonded to each TM. This analysis was performed by devising a function that, for every pixel in a 2D array, obtains the maximum change in mean NSB rate between itself and its adjacent neighbours (if they exist), then assigns that value to the pixel. This calculation neglects changes in the PSF across the focal plane in the camera. The results from this investigation are shown in Figures \ref{fig:diffetacarpixel}, \ref{fig:diffetacarsuperpixel} and \ref{fig:diffetacarTM}.
 
 
 
-\begin{figure}[ht]
+\begin{figure}[t!]
 %L, B, R, T
 \begin{minipage}{\linewidth}\centering
 \subcaptionbox{Dark empty field.}{\includegraphics[width=0.48\linewidth]{./figures/Hz_pixel_diff_dark.png}}
@@ -283,7 +319,7 @@ This was performed by devising a function that, for every pixel in a 2D array, o
 \end{minipage}
 \end{figure} 
 
-\begin{figure}[h]
+\begin{figure}[t!]
 %L, B, R, T
 \begin{minipage}{\linewidth}\centering
 \subcaptionbox{Dark empty field.}{\includegraphics[width=0.48\linewidth]{./figures/Hz_Superpixel_diff_dark.png}}
@@ -296,7 +332,7 @@ This was performed by devising a function that, for every pixel in a 2D array, o
 \end{minipage}
 \end{figure} 
 
-\begin{figure}[h]
+\begin{figure}[t!]
 %L, B, R, T
 \begin{minipage}{\linewidth}\centering
 \subcaptionbox{Dark empty field.}{\includegraphics[width=0.48\linewidth]{./figures/Hz_TM_diff_dark.png}}
@@ -309,12 +345,12 @@ This was performed by devising a function that, for every pixel in a 2D array, o
 \end{minipage}
 \end{figure}
 
-In the case of individual pixels, it appears the pixels adjacent to those with high NSB from stars are largely isolated from other potential sources of NSB, however once these results are binned and averaged by superpixel and TM that one starts to frequently observe the effect of multiple stars overlapping. From these results, it appears clear that the regions of the camera that will need to be most robust to significant routine changes in NSB are the pixels, superpixels and TMs nearest to SSTCAM's uninstrumented corners. More generally, it appears clear that pixels, superpixels and TMs need to be robust to a single pixel being at illuminated at a rate of $\mathrm{1\,GHz}$ whilst its neighbours are illuminated at a few hundred MHz.
+In the case of individual pixels, it appears the pixels adjacent to those with high NSB from stars are largely isolated from other potential sources of NSB, however once these results are binned and averaged by superpixel and TM that one starts to frequently observe the effect of multiple stars overlapping. The increased changes near the camera's uninstrumented corners are an analysis artefact stemming from the lack of pixel, TM and superpixels in these regions. However, it appears clear that pixels, superpixels and TMs need to be robust to a single pixel being at illuminated at a rate of $\mathrm{1\,GHz}$ whilst its neighbours are illuminated at a few hundred MHz.
 
 \subsection{Change in Eta Carinae NSB Over Time}
-To determine the maximum possible change in NSB through the camera over a run, we ran \textit{nsb} to simulate a momentary observation a half hour before each of the observations in Table \ref{tab:etacar_params} (tracking the source). This choice was based on the fact that the source sets after the full moonlight run, and also removes potential issues related to normalisation of pixel intensities in nLb over time that we discuss in the next subsection. Whilst these results in Figures \ref{fig:30minsetacarpixel}, \ref{fig:30minsetacarsuperpixel} and \ref{fig:30minsetacarTM} show that the brightness of an individual pixel can change on the order of a GHz per 30 minutes, changes in the mean illumination of the camera are much slower, being of the order of $\mathrm{2\,MHz/hour}$. This is with the exception of the fully moonlit scenario, where the mean change over half an hour is dominated by a bright star.
+To determine the maximum possible change in NSB through the camera over a run, we ran \textit{nsb} to simulate an observation of the instant exactly a half hour before each of the observations in Table \ref{tab:etacar_params} (tracking the source). This choice was based on the fact that the source sets after the full moonlight run, and also removes potential issues related to normalisation of pixel intensities in nLb over time that we discuss in the next subsection. Whilst these results in Figures \ref{fig:30minsetacarpixel}, \ref{fig:30minsetacarsuperpixel} and \ref{fig:30minsetacarTM} show that the brightness of an individual pixel can change on the order of a GHz per 30 minutes, changes in the mean illumination of the camera are much slower, being of the order of $\mathrm{2\,MHz/hour}$. This is with the exception of the fully moonlit scenario, where the mean change over half an hour is dominated by a bright star.
 
-\begin{figure}[ht]
+\begin{figure}[t!]
 %L, B, R, T
 \begin{minipage}{\linewidth}\centering
 \subcaptionbox{Dark empty field.}{\includegraphics[width=0.48\linewidth]{./figures/diff_Hz_pixel_dark.png}}
@@ -327,7 +363,7 @@ To determine the maximum possible change in NSB through the camera over a run, w
 \end{minipage}
 \end{figure} 
 
-\begin{figure}[ht]
+\begin{figure}[t!]
 %L, B, R, T
 \begin{minipage}{\linewidth}\centering
 \subcaptionbox{Dark empty field.}{\includegraphics[width=0.48\linewidth]{./figures/diff_Hz_Superpixel_dark.png}}
@@ -340,7 +376,7 @@ To determine the maximum possible change in NSB through the camera over a run, w
 \end{minipage}
 \end{figure} 
 
-\begin{figure}[ht]
+\begin{figure}[t!]
 %L, B, R, T
 \begin{minipage}{\linewidth}\centering
 \subcaptionbox{Dark empty field.}{\includegraphics[width=0.48\linewidth]{./figures/diff_Hz_TM_dark.png}}
@@ -355,7 +391,7 @@ A procedure to deal with the moon entering the FoV (potentially by accident) has
 
 \subsection{Eta Carinae NSB Per Pixel}
 \label{sec:etacartimespan}
-\begin{figure}[ht]
+\begin{figure}[t!]
 \begin{centering}
 %L, B, R, T
 \resizebox{\columnwidth}{!}{\includegraphics[width=\columnwidth]{./figures/etacartimespan.png}}
@@ -364,13 +400,13 @@ A procedure to deal with the moon entering the FoV (potentially by accident) has
 \end{centering}
 \end{figure}
 
-To determine the limit of brightness in a single pixel over a year, \textit{nsb} has a tool to perform this. However, said tool only provides results in nLb at a particular infinitesimal point, which is something of a meaningless quantity. As such, for running this tool for SSTCAM with NSB, we assume our non-moonlight Eta Carinae NSB run from the previous run represents a typical observation, and scale the mean of the year long timespan plot to the mean pixel value for that run. In the case of the maximum NSB variation over a single night, we instead normalise the maximum of the NSB rate to the maximum of the year long plot (to which the single night's observation corresponds).
+\textit{nsb} has a tool to determine the limit of brightness in a single pixel over a year. However, said tool only provides results in nLb at a particular infinitesimal point, which is something of a meaningless quantity. As such, for running this tool for SSTCAM with NSB, we assume our non-moonlight Eta Carinae NSB run from Section \ref{sec:etacarvary} represents a typical observation, and scale the mean of the year long timespan plot to the mean pixel value for that run. In the case of the maximum NSB variation over a single night, we instead normalise the maximum of the NSB rate to the maximum of the year long plot (to which the single night's observation corresponds).
 
 Figure \ref{fig:etacar_timespan} clearly shows that whilst there is modulation in the apparent brightness of the region given lunar phase and separation, there is also a very strong dependence on moon altitude, with the brightest times being when the moon is both high on the sky, near $\mathrm{1.0\,FLI}$, and close to the source. Throughout these results and those in Subsection \ref{sec:etacarvary} it appears as though lunar illumination, separation and altitude will be the dominant cause of both high NSB and rapid changes in it.
 
 There is some inconsistency between this result and the result for the entire camera on the same night with a 30 minute difference, which shows an overall drop in NSB over the same time window, although both show extreme variation. This could be the result of a minor bug in \textit{nsb}, or it could be a results of the infinitesimally small region of the sky corresponding to Eta Carinae brightening whilst the larger FoV is darkening. However, this suggests that even on the most extreme sources changes in NSB rate per pixel should be within the capacity of the LED flasher system to correct. 
 
-\begin{figure}[ht]
+\begin{figure}[t!]
 \begin{centering}
 %L, B, R, T
 \resizebox{\columnwidth}{!}{\includegraphics[trim=0cm 0cm 0cm 0cm,clip=true,width=\columnwidth]{./figures/timespan_Hz_etacarmaxnorm.png}}
@@ -381,7 +417,7 @@ There is some inconsistency between this result and the result for the entire ca
 \newpage
 \subsection{Observing Time Gains}
 Within \textit{nsb}, there is similarly a function to provide plots of the observation time gained as a function of NSB threshold, but this again is in nLb at an infinitesimal point. As such, we treat our Eta Carinae dark frame as nominal, and create a timespan plot for that night (shown in Figure \ref{fig:timespan_dark} and observing location. The total possible observing time is obtained by summing all the elements in the brightness array where the brightness is less than a given threshold , and then multiplying this by the time resolution (as the time resolution for this brightness array is a pre-set parameter).
-\begin{figure}[ht]
+\begin{figure}[t!]
 \begin{centering}
 %L, B, R, T
 \resizebox{\columnwidth}{!}{\includegraphics[trim=0cm 0cm 0cm 0cm,clip=true,width=\columnwidth]{./figures/timespan_dark.png}}
@@ -390,7 +426,7 @@ Within \textit{nsb}, there is similarly a function to provide plots of the obser
 \end{centering}
 \end{figure}
 
-We then divide the observation time gain values by a the nominal NSB value obtained from this measurement ($\mathrm{50\,nLb}$), and perform an observing time gain calculation for the Vela Pulsar (Figure \ref{fig:obstimegainvelapulsar}) and the blazar Markarian 421 (Figure \ref{fig:obstimegainmrk421}, in order to consider differences from galactic vs extragalactic sources) from the Paranal site, considering a year at the Paranal site starting at 2022-01-27. The associated CTA requirement is also shown in these figures.
+We then divide the observation time gain values by a the nominal NSB value obtained from this measurement ($\mathrm{50\,nLb}$), and perform an observing time gain calculation for the Vela Pulsar (Figure \ref{fig:obstimegainvelapulsar}) and the blazar Markarian 421 (Figure \ref{fig:obstimegainmrk421}, in order to consider differences from galactic versus extragalactic sources) from the Paranal site, considering a year at the Paranal site starting at 2022-01-27. The associated CTA requirement is also shown in these figures.
 
 \begin{figure}[h!]
 \begin{centering}
@@ -419,7 +455,7 @@ Whilst a reasonable approximation given the complexity of observing a particular
 \end{quote}
 Additionally, this requirement mandates that the moon must be at $\mathrm{0.5\,FLI}$ and is at an altitude of 45 degrees and the telescope is pointed at the zenith. To compare to our half-moonlit Eta Carinae run, we ran \textit{nsb} runs with exactly these parameters for UTC time 2022-03-24T07:32:00.000, the results from this investigation are shown in Figure \ref{fig:hm}.
 
-\begin{figure}[ht]
+\begin{figure}[t!]
 %L, B, R, T
 \begin{minipage}{\linewidth}\centering
 \subcaptionbox{NSB per pixel.}{\includegraphics[width=0.48\linewidth]{./figures/hm_pixel.png}}
@@ -431,9 +467,9 @@ Additionally, this requirement mandates that the moon must be at $\mathrm{0.5\,F
 
 \end{minipage}
 \end{figure}
-The results for these half-moonlight observations demonstrate that if SSTCAM performance requirements up to a $\mathrm{160\,MHz}$ NSB rate can be met, the overall camera will function well under most realistic observing scenarios. The question becomes if individual pixels will be able to handle such NSB rates without an overwhelming gain$\times$PDE$\times$Optical Cross-Talk (OCT) drop.
+The results for these half-moonlight observations demonstrate that if SSTCAM performance requirements up to a $\mathrm{160\,MHz}$ NSB rate can be met, the overall camera will function well under most realistic observing scenarios. The question becomes if individual pixels will be able to handle such NSB rates without an overwhelming gain$\times$PDE$\times$Optical Cross-Talk (OCT) drop. Whilst in general we want OCT (a phenomenon caused by infrared secondary photons generated during the electron avalanche escaping their SiPM channels) to be as low as possible, as all three of these quantities are proportional to $\Delta V$; if we reduce the overvoltage to minimise the OCT we will degrade the camera's performance.
 
-These half-moonlit results are slightly more pessimistic than the half-moonlit Eta-Carinae runs, due to the difficulty of observing Eta Carinae at the requirement altitude from the southern site, but they are still within a factor of around 2 of the same values. They are also largely consistent with values generated using \textit{sim\_telarray}; for the simulation production Prod3b \textit{sim\_telarray} predicts between 160 and 200MHz (depending on SiPM selection). This \textit{sim\_telarray} prediction is based on scaling the Benn and Ellison spectrum under the same conditions, albeit with a 2 telescope multiplicity cut we can't replicate here. In contrast, the existing half-moonlight investigation for the SST-1M project \cite{1mcalib} estimated a value of $\mathrm{670\,MHz}$ for the same conditions,. Other than human error a possible source of this discrepancy is the physical size of the photomultiplier pixels, which for SSTCAM is $\mathrm{6/7\,mm}$ ($0.19^{\circ}$ on sky) as opposed to around $\mathrm{2.32\,cm}$ ($0.24^{\circ}$ on sky) for Digicam (the SST-1M prototype camera). Other differences between the photomultipliers used (such as PDE) might also affect the Digicam results. 
+These half-moonlit results are slightly more pessimistic than the half-moonlit Eta-Carinae runs, due to the difficulty of observing Eta Carinae at the requirement altitude from the southern site, but they are still within a factor of around 2 of the same values. They are also largely consistent with values generated using \textit{sim\_telarray}; for the simulation production Prod3b \textit{sim\_telarray} predicts between 160 and 200MHz (depending on SiPM selection). This \textit{sim\_telarray} prediction is based on scaling the Benn and Ellison spectrum under the same conditions. In contrast, the existing half-moonlight investigation for the SST-1M project \cite{1mcalib} estimated a value of $\mathrm{670\,MHz}$ for the same conditions. Other than human error a possible source of this discrepancy is the physical size of the photomultiplier pixels, which for SSTCAM is $\mathrm{6/7\,mm}$ ($0.19^{\circ}$ on sky) as opposed to around $\mathrm{2.32\,cm}$ ($0.24^{\circ}$ on sky) for Digicam (the SST-1M prototype camera). Other differences between the photomultipliers used (such as PDE) might also affect the Digicam results. 
 
 \subsection{Required Flasher Timespans}
 
@@ -441,13 +477,13 @@ The complexity of operating a fast-signal chain for Cherenkov astronomy simultan
 
 The angular field rotation of a star $R$ can be described as a function of Latitude (Lat), Altitude (Alt) and Azimuth (Az) using the formula
 \begin{equation}
-    R(Lat,Alt,Az)=K\cos(Lat)\frac{\cos(Az)}{\cos(Alt)}
+    R(\mathrm{Lat,Alt,Az})=K\cos(\mathrm{Lat})\frac{\cos(\mathrm{Az})}{\cos(\mathrm{Alt)}}
     \label{eq:rot}
 \end{equation}
-where the constant $K$ is $\mathrm{15.04\,degrees/hour}$. Using this formula, it is possible to extract the number of required flasher calibration pulses to reach a mean flasher error level. If we assume a mean illumination level from the flasher of 50 photoelectrons (pe) and that we can only extract the charge to 40\% worse than Poisson (an expected limit given current CHEC-S charge extraction methods \cite{jasonthesis}), then we need 40 seconds (i.e. 400 pulses) to reach 1\% error on the mean flasher level per pixel, the ideal level for SSTCAM. The limits on stellar rotation rate occur at the point at which stars cause a gain change in a SiPM pixel that happens more rapidly than can be calibrated for by injecting flashes at a fixed rate.
+where the constant $K$ is $\mathrm{15.04\,degrees/hour}$. Using this formula, it is possible to extract the number of required flasher calibration pulses to reach a mean flasher error level. If we assume a mean illumination level from the flasher of $50\,\mathrm{photoelectrons}$ (pe), and that the Excess Noise Factor (ENF), a property of the SiPMs used that describes the physical limit for the best possible SiPM charge resolution \cite{jasonthesis}, is 1.4 (the physically un-reachable ideal limit at which the charge resolution is limited by Poisson fluctuations would be 1). Then we need $40\,\mathrm{s}$ (i.e. $400\,\mathrm{pulses}$) to reach a 1\% error on the mean flasher level per pixel. This is the needed flasher calibration level for SSTCAM to be able to meet the intensity resolution requirements of CTA for high-amplitude signals, details of this intensity resolution requirement can be found in \cite{tomintensity}. The limits on stellar rotation rate occur at the point at which stars cause a gain change in a SiPM pixel that happens more rapidly than can be calibrated for by injecting flashes at a fixed rate.
 
-Figure \ref{fig:rot40s} shows the areas on the sky where a 1\% flasher error can be achieved given this model of angular field rotation. The sky positions (assuming the Paranal site) of bright stars (brighter than 4 mag) from the Hipparcos catalogue are calculated using the \textit{Skyfield} package and are also plotted.
-\begin{figure}[h]
+Figure \ref{fig:rot40s} shows the areas on the sky where a 1\% flasher error can be achieved given this model of angular field rotation. The sky positions (assuming the Paranal site) of bright stars (brighter than 4 mag) from the \textit{Hipparcos} catalogue are calculated using the \textit{Skyfield} package and are also plotted.
+\begin{figure}[t!]
 \begin{centering}
 %L, B, R, T
 \includegraphics[width=0.7\columnwidth]{./figures/rot40s.png}
@@ -456,9 +492,9 @@ Figure \ref{fig:rot40s} shows the areas on the sky where a 1\% flasher error can
 \end{centering}
 \end{figure}
 
-This clearly causes a slight error in calibration along the North-South axis, but this is tolerable given the rate at which stars move across the sky. By doubling the error budget and reducing the between the flashing procedure one can achieve much greater calibrated sky coverage, as seen in Figure \ref{fig:rot10s}, with only a handful of bright stars falling outside the calibrated range. These results suggest that the current flasher calibration plan for SSTCAM is likely to be acceptable.
+This clearly causes a slight error in calibration along the North-South axis, but this is tolerable given the rate at which stars move across the sky. By doubling the error budget and reducing the between the flashing procedure one can achieve much greater calibrated sky coverage, as seen in Figure \ref{fig:rot10s}, with only a handful of bright stars falling outside the calibrated range. These results suggest that the current flasher calibration plan for SSTCAM of using the flasher to generate 100-200 photons with nanosecond precision \footnote{Further details of this (early) calibration plan can be found on the internal SSTCAM nextcloud pages at \url{https://pcloud.mpi-hd.mpg.de/index.php/apps/files/?dir=/SSTCamera/03_CameraCalls/CameraCallMaterial&openfile=305207}.} is likely to be acceptable.
 
-\begin{figure}[h]
+\begin{figure}[t!]
 \begin{centering}
 %L, B, R, T
 \includegraphics[width=0.7\columnwidth]{./figures/rot10s.png}
@@ -472,7 +508,7 @@ This clearly causes a slight error in calibration along the North-South axis, bu
 To understand the short-term effect of stars moving through the field, we ran \textit{nsb} fields at 3 minute intervals, pointing at the zenith under half-moonlit conditions, and observed both the absolute pixel NSB values and the overall change since the first field. Note that this is also a worst-case scenario observing the fastest possible changes in stellar position, since $R$ in Equation \ref{eq:rot} is largest for a given observing latitude at the zenith.
 
 Despite the PSF not being particularly well modelled, it appears that bright stars move to adjacent pixels over a roughly 15 minute timespan, with light being partially `split' between multiple pixels and the associated ratio changing over order 3 minutes.
-\begin{figure}[ht]
+\begin{figure}[t!]
 %L, B, R, T
 \begin{minipage}{\linewidth}\centering
 \subcaptionbox{Initial field.}{\includegraphics[width=0.48\linewidth]{./figures/Hz_pixel_3m.png}}
@@ -487,7 +523,7 @@ Despite the PSF not being particularly well modelled, it appears that bright sta
 \label{fig:zenithpixel}
 \end{figure} 
 
-\begin{figure}[ht]
+\begin{figure}[t!]
 %L, B, R, T
 \begin{minipage}{\linewidth}\centering
 \subcaptionbox{Total change in pixel values after 3 minutes.}{\includegraphics[width=0.48\linewidth]{./figures/diff_Hz_pixel_3m.png}}
@@ -502,8 +538,8 @@ Despite the PSF not being particularly well modelled, it appears that bright sta
 \end{figure} 
 
 \subsection{Results for Observations of a Magnitude 0 star}
-For upcoming comparisons with other ray-tracing simulation methods, we investigated the brightness of Rigel (m=0.12) under astronomical dark time (UTC time 2021-12-08T04:48:00.000). This shows the light from a magnitude 0 star corresponds to an NSB rate of around $\mathrm{900\,MHz}$ in a single pixel (lower than previous expected). The movement of the star through multiple pixels in the camera plane could affect this value as seen in the previous subsection.
-\begin{figure}[h]
+For upcoming comparisons with other ray-tracing simulation methods, we investigated the brightness of Rigel (m=0.12) under astronomical dark time (UTC time 2021-12-08T04:48:00.000). This shows the light from a magnitude 0 star corresponds to an NSB rate of around $\mathrm{900\,MHz}$ in a single pixel (lower than previously expected). The movement of the star through multiple pixels in the camera plane could affect this value as seen in the previous subsection.
+\begin{figure}[t!]
 \begin{centering}
 %L, B, R, T
 \includegraphics[width=0.7\columnwidth]{./figures/Hz_pixel_Rigel.png}
@@ -515,7 +551,7 @@ For upcoming comparisons with other ray-tracing simulation methods, we investiga
 
 In this chapter, we have examined the potential effects of NSB for SSTCAM. We have presented detailed simulations of the background to Eta Carinae under four observing scenarios, calculated the effect on individual pixels observing the same field over time, calculated the potential observing time to be gained for two sources by operating at a high NSB level, verified the half moonlight CTA requirement, investigated on short timescales the movement of stars through the camera and considered the ability of the LED flasher system to compensate for NSB from stars.
 
-Whilst the \textit{nsb} package has proven capable of generating useful results for SSTCAM, it currently does not meet CTA software requirements for test coverage or code quality (and development by H.E.S.S. on the package has stalled). There would be significant advantages to recreating its functionality in the future with a \textit{ctapipe}-affiliated project (following modern code development principles) for all CTA instruments. Notably \textit{nsb's} speed could likely be improved by using Just-In-Time compilation and a storage medium for healpix data that was quicker to access and parse than a text file (as is currently the case).
+Whilst the \textit{nsb} package has proven capable of generating useful results for SSTCAM, it currently does not meet CTA software requirements for test coverage or code quality (and development by H.E.S.S. on the package has stalled). There would be significant advantages to recreating its functionality in the future with a \textit{ctapipe}-affiliated project (following modern code development principles) for all CTA instruments. Notably \textit{nsb}'s speed could likely be improved by using Just-In-Time compilation and a storage medium for healpix data that was quicker to access and parse than a text file (as is currently the case).
 
 It should be noted that the results presented here are a significantly simplified analysis. In particular, we do not consider the effects of OCT, focal plane curvature or non-uniformity of the PSF across the camera plane. Similarly, there is a potential for `ghost' stars to appear in the field of view as a result of reflections of starlight from the SiPMs or window. We also neglect any wavelength dependence of PDE or telescope transmission. That said, our models are significantly more realistic than those available natively in \textit{sim\_telarray}, are broadly as expected, and appear to be largely consistent with values obtained from dedicated full Monte Carlo simulations.
 
