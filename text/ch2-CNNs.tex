@@ -104,7 +104,7 @@ The Linear Rectifier Function ($\textrm{ReLu}(x)$) as a function of input variab
 
 The Softmax function is a generalization of the Sigmoid function, and is appropriate as the final layer activation function for multi-class (>2 class) classification. For a vector input $(\textbf{x})$ with $i$th components $x_i $ and a given number of classes $K$ it is defined as
 \begin{equation}
-    \sigma(\textbf{x})_i=\frac{e^{x_i}}{\sum_{j=1}^K e^{x_j}}
+    \sigma(\textbf{x})_i=\frac{e^{x_i}}{\sum_{j=1}^K e^{x_j}}.
 \end{equation}
 
 Neural networks can also be used as a method for regression, by having training data with continuous labels and modifying the activation function of the final layer in the network to provide a score on a continuous space. This can be used for IACTs for directional and energy reconstruction, however this thesis doesn't approach this task (further information can be found for example in \cite{mikaelphd} and \cite{tjarkicrc}).  
@@ -248,21 +248,20 @@ Batch normalisation is a technique for easing training of deep neural networks, 
 where the batch mean and variance are those calculated for a given epoch $i$, $\epsilon$ is a small constant hyperparameter set during network design. $\gamma$ and $\beta$ are both learned by the network during training; they describe a scaling factor and offset factor relative to a Gaussian distribution. 
 
 Batch normalisation has both a regularising effect, preventing individual weights from becoming too large, as well as ensuring that the next layer in the network does not have to deal with weight changes that are too large, which reduces the overall training time required \cite{tdsbatch}. At inference (testing) time, the layer normalizes its output using a moving average of the mean and variance of the batches it has seen during training \cite{Keras}, this can causes issues if the batches used during training are not a representative distribution of examples of the overall training data \cite{tdsbatch}. These moving averages in \textit{Keras} are defined iteratively epoch by epoch using the formulae
+\newline
 \begin{equation}
     \begin{split}
-    \\
     \textrm{Moving Mean}_i=\textrm{Moving Mean}_{i-1}\times \textrm{Momentum} +\\ \textrm{Batch Mean}_i \times (1-\textrm{Momentum})
     \end{split}
     \label{eq:movingav}
 \end{equation}
 \begin{equation}
     \begin{split}
-    \\
     \textrm{Moving Variance}_i=\textrm{Moving Variance}_{i-1}\times \textrm{Momentum} +\\ \textrm{Batch Variance}_i \times (1-\textrm{Momentum})
     \end{split}
     \label{eq:movingstd}
 \end{equation}
-
+\newline
 where momentum is a configurable hyperparameter, which in effect dampens the effect of oscillations in the moving mean and variance.
 
 \section{Past and Concurrent Work on CNNs With IACT data}

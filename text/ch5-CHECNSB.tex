@@ -34,17 +34,21 @@ The standard \textit{CORSIKA/sim\_telarray} simulation package \cite{simtel}, us
 \end{equation}
 
 \begin{equation}
+    \begin{split}
     X(Z)=\begin{cases} (1-0.96\sin^2 Z)^{-0.5} & \mbox{, if }  Z\leq\pi/2 \\ (1 - 0.96 \times 1)^{-0.5} & \mbox{, otherwise } \end{cases},
+    \end{split}
 \end{equation}
 
 \begin{equation}
-\begin{aligned}
+\begin{split}
     B_{Moon}(\rho,Z,Z_{M},k,\alpha_{M},A,B,C)=f(\rho,A,B,C) \times I_{M}(\alpha_{M}) \\ \times 10^{-0.4kX(Z_{M})}\\ \times [1-10^{-0.4 k X(Z)}]
-\end{aligned}
+\end{split}
 \end{equation}
 
 \begin{equation}
+    \begin{split}
     B_{Sky}(Z,\phi,B_0,k)=\begin{cases} B_0\times X(Z) \times 10^{-0.4k(X(Z)-1)} & \mbox{, if }  Z\leq\pi/2 \\ 0 & \mbox{, otherwise } \end{cases},
+    \end{split}
     \label{eq:Bs}
 \end{equation}
 
@@ -52,7 +56,6 @@ The standard \textit{CORSIKA/sim\_telarray} simulation package \cite{simtel}, us
     B_{Total}=B_{Moon}+B_{Sky}+B_{Gaia}
     \label{eq:Bt}
 \end{equation}
-
 where $B_{Total}$ is the total brightness for a given pixel on the sky, $B_{Moon}$ is the surface brightness from moonlight (compared to the same region of sky without the moon present), $B_{Sky}$ is the intrinsic surface brightness of the sky, $B_{Gaia}$ is the brightness of stars in the healpix pixel \cite{healpix}, $Z$ is the Zenith angle, $\phi$ is the azimuth (with subscript $_M$ referring to Moon parameters rather than source parameters), $I_m$ is the illuminance of the Moon in footcandels, $X(Z)$ represents the optical pathlength along the line of sight in units of air masses, $B_0$ is a constant representing the brightness of the sky at the zenith and $f(\rho,A,B,C)$ is the scattering function as a function of lunar great circle separation angle $\rho$. In this form $f(\rho,A,B,C)$ takes into account both Rayleigh scattering from atmospheric gases and Mie scattering from atmospheric aerosols (larger solid particles suspended in the atmosphere). Rayleigh and Mie scattering occur at different altitudes and over different distributions of scattering particles in the atmosphere and so require individual (empirically determined) functional forms; $A$ and $B$ are the fitted coefficients to quantify the relative contributions of Rayleigh and Mie scattering respectively. $A$ and $B$ were introduced in the Krisciunas and Schaeffer \cite{Krisciunas} work, but the additional $C$ parameter in Equation \ref{eq:f} was added by the creators of the \textit{hess\_basic} model to account for the relative brightness of the sky to the stars from \textit{Gaia}. The factors of $-0.4k$ that appear in the exponents of Equations \ref{eq:Im} to \ref{eq:Bs} are a result of a simplification of an integral over a volume extinction coefficient, where $k$ is the measured extinction coefficient along the line of sight (see \cite{Krisciunas} for further details). The remainder of the exponent in Equation \ref{eq:Im} is an empirical fit \cite{Krisciunas}; all the fitted values used are presented in Table \ref{tab:params}. $B_{Total}$ (along with all the other native outputs from the \textit{hess\_basic} \textit{nsb} model) are expressed here in nanoLamberts (nLb), where a brightness in nanoLamberts $B$ relates to magnitudes per square arc second in the V band ($V$) through
 \begin{equation}
     \frac{B}{\textrm{nanoLamberts}}=34.08\exp(20.7233-0.92104\times V)

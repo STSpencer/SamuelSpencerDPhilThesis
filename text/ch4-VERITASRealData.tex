@@ -86,13 +86,11 @@ The Crab Nebula was the first astrophysical $\gamma$-ray source reliably detecte
 \section{Methods}
 \subsection{Our Analysis Framework}
 Our framework to bootstrap the \textit{Eventdisplay} analysis chain consists of three main steps:
-
 \begin{itemize}
     \item HDF5 file dumpers to convert both simulated and real VERITAS images in .root DST files into a format suitable for deep learning. This includes image mapping and mixing of proton/$\gamma$-ray simulations as appropriate. To obtain data from the ROOT DSTs we use the \textit{root\_numpy} \cite{rootnumpy} package.
     \item \textit{Keras} scripts to perform training and testing of the ConvLSTMs, and write test predictions for a given event to file.
     \item Scripts to take a .root file generated using the normal analysis chain and add an additional tree containing the ConvLSTM predictions in order to make spectra and skymaps.
 \end{itemize}
-
 The analysis structure for performing this is shown in Figure \ref{fig:Gettingout}, and the associated code can be found at \url{https://github.com/STSpencer/Getout}. Modifications to the \textit{Eventdisplay} code were also necessary in order to handle both the new deep learning results and the use of run-wise simulations. A significant complicating factor was matching exactly the same number of predictions with the number of events in the data .root files. This mandated testing events individually with a batch size of 1, which slowed the deep learning analysis. A future sufficiently flexible end to end CTA pipeline would avoid this step; we discuss the potential for this in Chapter \ref{ch6-Conclusions}.
 \begin{figure}[h] 
         % read manual to see what [ht] means and for other possible options
@@ -279,16 +277,15 @@ where $y^*$ is a threshold value of the objective function (below which $p(y|x^*
     \label{eq:surrogate}
 \end{equation}
 where $p(x^*|y)$ is the probability of the hyperparameters selected given the score on the objective function \cite{tdshyper}. In turn, $p(x^*|y)$ is modelled as two separate distributions by TPE methods
-
 \begin{equation}
+\begin{split}
     p(x^*|y) = \begin{cases} \textit{l}(x^*) & \mbox{, if }  y <y^* \\ \textit{g}(x^*) & \mbox{, if } y\geq y^* \end{cases}
+\end{split}
 \end{equation}
-
 where $y^*$ is the threshold value of the objective function, $l(x^*)$ is the density function formed by using the set of $i$ observations ${x^{*(i)}}$ such that the corresponding loss $f(x^{*(i)})$ was less that $y^*$ and $g(x^*)$ is the density function formed by using the remaining observations. $y^*$ is chosen by the algorithm to be one of the observed $y$ values $\gamma$ such that $p(y<y^*)=\gamma$ \cite{bergestra}. Given that $\gamma=p(y<y^*)$ and $p(x^*)=\int_{\mathbb{R}}p(x^*|y)\,p(y)dy=\gamma\,l(x^*)+(1-\gamma\,g(x^*))$ by construction, and using Bayes' theorem and substitution, the $\textrm{EI}$ can then be written as 
 \begin{equation}
-    \textrm{EI}_{y^*}(x^*)=\frac{\gamma y^* \textit{l}(x^*)-\textit{l}(x^*)\int_{-\infty}^{y^*}p(y)dy}{\gamma \textit{l}(x^*)+(1-\gamma) \textit{g}(x^*)} \propto \left( \gamma +\frac{\textit{g}(x^*)}{\textit{l}(x)} (1-\gamma)\right)^{-1}
+    \textrm{EI}_{y^*}(x^*)=\frac{\gamma y^* \textit{l}(x^*)-\textit{l}(x^*)\int_{-\infty}^{y^*}p(y)dy}{\gamma \textit{l}(x^*)+(1-\gamma) \textit{g}(x^*)} \propto \left( \gamma +\frac{\textit{g}(x^*)}{\textit{l}(x)} (1-\gamma)\right)^{-1}.
 \end{equation}
-
 
 The TPE approach then maximises the $\textrm{EI}$ by drawing values from the $\textit{l}(x^*)$ distribution, and maximizing the ratio $\textit{l}(x^*)/\textit{g}(x^*)$, which in turn maximises the $\textrm{EI}$ \cite{tdshyper}. In practice, the fact that Equation \ref{eq:surrogate} is not a perfect representation of $p(y|x^*)$ (because of the way $p(x^*|y)$ is modelled) may mean that the hyperparameter choice offers no improvement in the objective. Therefore $l(x^*)$ and $g(x^*)$ need to be updated per iteration of optimisation; the use of a distribution rather than a single value for $\textit{l}(x^*)$ helps to balance the trade-off between exploration and exploitation, as selecting hyperparameters in a region too far from the explored hyperparameter space is effectively penalised. But in practical terms, TPE optimisation can reasonably be thought of as performing a modified version of gradient descent over hyperparameter values, with the loss function as the quantity being optimised.
 
@@ -362,7 +359,6 @@ The initial optimisation efforts revolved around training a ConvLSTM2D classifie
 \end{table}
 
 This significance of this detection is a mild function of multiplicity, the significance can reach $\mathrm{16.1\,\sigma}$ if a telescope multiplicity cut of 4 is imposed, this is a result of the signal-to-noise ratio being higher for such events. The standard VERITAS analysis, reliant upon BDTs, achieves a $\mathrm{22\,\sigma}$ detection on the same data without this strong multiplicity cut, although it is trained with a different dataset so the comparison is imperfect\footnote{Details of this analysis can be found at \url{https://veritas.sao.arizona.edu/wiki/index.php/Eventdisplay_Manual:_event_display}; but note that this is a VERITAS internal site only accessible from VERITAS member institutes.}.
-
 \begin{figure}[h] 
         % read manual to see what [ht] means and for other possible options
         \centering \includegraphics[width=\columnwidth]{figures/crabrun2opt4trainlog.png}
@@ -371,7 +367,6 @@ This significance of this detection is a mild function of multiplicity, the sign
                 \label{fig:opt4_trainlog} The training curve for the opt4 run.
         }
 \end{figure}
-
 Curiously the validation data training curve appears to converge in this one specific instance, but it is unclear if this relates to the ConvLSTM2D classifier learning meaningful features in the simulated images or if this is simply a coincidence. 
 
 \begin{figure}[ht] 
